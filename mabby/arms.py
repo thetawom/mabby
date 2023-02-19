@@ -42,6 +42,9 @@ class ArmSet:
     def play(self, i):
         return self[i].play()
 
+    def best_arm(self):
+        return np.argmax([arm.mean for arm in self._arms])
+
 
 class BernoulliArm(Arm):
     def __init__(self, p):
