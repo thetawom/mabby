@@ -1,5 +1,6 @@
 from collections import defaultdict
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -54,3 +55,21 @@ class SimStats:
         self.rewards[bandit] = self._rewards[bandit] / self._trials
         self.optimality[bandit] = self._optimality[bandit] / self._trials
         self.regret[bandit] = np.cumsum(self._regret[bandit] / self._trials)
+
+    def plot_rewards(self):
+        for i, (bandit, stats) in enumerate(self.rewards.items()):
+            plt.plot(stats, label=f"bandit {i}")
+        plt.legend()
+        plt.show()
+
+    def plot_optimality(self):
+        for i, (bandit, stats) in enumerate(self.optimality.items()):
+            plt.plot(stats, label=f"bandit {i}")
+        plt.legend()
+        plt.show()
+
+    def plot_regret(self):
+        for i, (bandit, stats) in enumerate(self.regret.items()):
+            plt.plot(stats, label=f"bandit {i}")
+        plt.legend()
+        plt.show()
