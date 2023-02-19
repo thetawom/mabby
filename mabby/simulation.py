@@ -9,17 +9,17 @@ class Simulation:
         self.bandits = bandits
         self.armset = armset
 
-    def run(self, trials, rounds):
-        stats = SimStats(self, trials, rounds)
+    def run(self, trials, steps):
+        stats = SimStats(self, trials, steps)
         for bandit in self.bandits:
             for _ in range(trials):
-                self._run_trial(stats, bandit, rounds)
+                self._run_trial(stats, bandit, steps)
         stats.compile_all()
         return stats
 
-    def _run_trial(self, stats, bandit, rounds):
-        bandit.prime(len(self.armset), rounds)
-        for i in range(rounds):
+    def _run_trial(self, stats, bandit, steps):
+        bandit.prime(len(self.armset), steps)
+        for i in range(steps):
             choice = bandit.choose()
             reward = self.armset.play(choice)
             bandit.update(reward)
@@ -27,7 +27,7 @@ class Simulation:
 
 
 class SimStats:
-    def __init__(self, simulation, trials, rounds):
+    def __init__(self, simulation, trials, steps):
         self._sim = simulation
         self._trials = trials
 
@@ -35,9 +35,9 @@ class SimStats:
         self.optimality = defaultdict(lambda: None)
         self.regret = defaultdict(lambda: None)
 
-        self._rewards = defaultdict(lambda: np.zeros(rounds))
-        self._optimality = defaultdict(lambda: np.zeros(rounds))
-        self._regret = defaultdict(lambda: np.zeros(rounds))
+        self._rewards = defaultdict(lambda: np.zeros(steps))
+        self._optimality = defaultdict(lambda: np.zeros(steps))
+        self._regret = defaultdict(lambda: np.zeros(steps))
 
     def update(self, bandit, i, choice, reward):
         best_arm = self._sim.armset.best_arm()
