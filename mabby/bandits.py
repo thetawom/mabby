@@ -6,9 +6,20 @@ from mabby.exceptions import BanditUsageError
 
 
 class Bandit(ABC):
-    def __init__(self):
+    def __init__(self, name=None):
+        self._name = name
         self._primed = False
         self._choice = None
+
+    @property
+    def name(self):
+        if self._name is None:
+            return self.default_name()
+        return self._name
+
+    @abstractmethod
+    def default_name(self):
+        pass
 
     def prime(self, k, steps):
         self._primed = True
@@ -51,13 +62,16 @@ class Bandit(ABC):
 
 
 class EpsilonGreedyBandit(Bandit):
-    def __init__(self, eps):
-        super().__init__()
+    def __init__(self, eps, name=None):
+        super().__init__(name)
         if eps < 0 or eps > 1:
             raise ValueError("eps must be between 0 and 1")
         self.eps = eps
         self._Qs = None
         self._Ns = None
+
+    def default_name(self):
+        return f"epsilon-greedy (eps={self.eps})"
 
     def _prime(self, k, steps):
         self._Qs = np.zeros(k)
