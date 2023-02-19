@@ -58,18 +58,18 @@ class SimStats:
 
     def plot_rewards(self):
         for i, (bandit, stats) in enumerate(self.rewards.items()):
-            plt.plot(stats, label=f"bandit {i}")
+            plt.plot(stats, label=bandit.name)
         plt.legend()
         plt.show()
 
     def plot_optimality(self):
         for i, (bandit, stats) in enumerate(self.optimality.items()):
-            plt.plot(stats, label=f"bandit {i}")
+            plt.plot(stats, label=bandit.name)
         plt.legend()
         plt.show()
 
     def plot_regret(self):
         for i, (bandit, stats) in enumerate(self.regret.items()):
-            plt.plot(stats, label=f"bandit {i}")
+            plt.plot(stats, label=bandit.name)
         plt.legend()
         plt.show()
