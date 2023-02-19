@@ -1,5 +1,7 @@
 from abc import ABC, abstractmethod
 
+import numpy as np
+
 
 class Arm(ABC):
     @abstractmethod
@@ -39,3 +41,18 @@ class ArmSet:
 
     def play(self, i):
         return self[i].play()
+
+
+class BernoulliArm(Arm):
+    def __init__(self, p):
+        self.p = p
+
+    def play(self):
+        return np.random.binomial(1, self.p)
+
+    @property
+    def mean(self):
+        return self.p
+
+    def __repr__(self):
+        return f"Bernoulli(p={self.p})"
