@@ -19,3 +19,12 @@ repos:
     hooks:
       - id: isort
         args: [ "--profile", "black", "--filter-files" ]
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 0.7.16
+    hooks:
+      - id: mdformat
+        additional_dependencies:
+          - mdformat-gfm
+          - mdformat-black
+          - mdformat-frontmatter
+          - mdformat-footnote
