@@ -33,3 +33,8 @@ repos:
           - mdformat-black
           - mdformat-frontmatter
           - mdformat-footnote
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.0.1
+    hooks:
+      - id: mypy
+        exclude: ^tests/
