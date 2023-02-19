@@ -7,6 +7,7 @@ A multi-armed bandit (MAB) simulation library
 [![poetry](https://img.shields.io/badge/packaging-poetry-008adf)](https://python-poetry.org/)
 [![black](https://img.shields.io/badge/code%20style-black-000000)](https://github.com/psf/black)
 [![isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=ef8336)](https://pycqa.github.io/isort/)
+[![mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
 
 ## Overview
 
