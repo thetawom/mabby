@@ -10,10 +10,10 @@ class Bandit(ABC):
         self._primed = False
         self._choice = None
 
-    def prime(self, k, rounds):
+    def prime(self, k, steps):
         self._primed = True
         self._choice = None
-        self._prime(k, rounds)
+        self._prime(k, steps)
 
     def choose(self):
         if not self._primed:
@@ -34,7 +34,7 @@ class Bandit(ABC):
         return self.compute_Qs()
 
     @abstractmethod
-    def _prime(self, k, rounds):
+    def _prime(self, k, steps):
         pass
 
     @abstractmethod
@@ -59,7 +59,7 @@ class EpsilonGreedyBandit(Bandit):
         self._Qs = None
         self._Ns = None
 
-    def _prime(self, k, rounds):
+    def _prime(self, k, steps):
         self._Qs = np.zeros(k)
         self._Ns = np.zeros(k)
 
