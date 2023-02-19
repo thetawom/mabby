@@ -56,3 +56,19 @@ class BernoulliArm(Arm):
 
     def __repr__(self):
         return f"Bernoulli(p={self.p})"
+
+
+class GaussianArm(Arm):
+    def __init__(self, loc, scale):
+        self.loc = loc
+        self.scale = scale
+
+    def play(self):
+        return np.random.normal(self.loc, self.scale)
+
+    @property
+    def mean(self):
+        return self.loc
+
+    def __repr__(self):
+        return f"Gaussian(loc={self.loc}, scale={self.scale})"
