@@ -1,3 +1,3 @@
-from arms import *
-from bandits import *
-from simulation import *
+from mabby.arms import *
+from mabby.bandits import *
+from mabby.simulation import *
