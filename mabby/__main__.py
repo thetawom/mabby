@@ -8,7 +8,9 @@ if __name__ == "__main__":
         bandits=[explore_bandit, exploit_bandit],
         armset=mb.BernoulliArm.armset(p=[0.2, 0.6]),
     )
-    sim.run(trials=10, rounds=2000)
+    stats = sim.run(trials=100, rounds=200)
+    stats.plot_optimality()
+    stats.plot_regret()
 
     print("eps=0.8: ", explore_bandit.Qs)
     print("eps=0.1: ", exploit_bandit.Qs)
