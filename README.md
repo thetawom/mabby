@@ -15,3 +15,21 @@ A multi-armed bandit (MAB) simulation library
 - choose from a wide range of preset classic bandit algorithms to use
 - configure environments with custom arm spaces and rewards distributions
 - collect, store, and visualize simulation statistics
+
+## Example Usage
+
+Below is an example of a simple simulation comparing two epsilon-greedy bandits with different exploration parameters.
+
+```python
+import mabby as mb
+
+explore_bandit = mb.EpsilonGreedyBandit(eps=0.8)
+exploit_bandit = mb.EpsilonGreedyBandit(eps=0.1)
+sim = mb.Simulation(
+    bandits=[explore_bandit, exploit_bandit],
+    armset=mb.BernoulliArm.armset(p=[0.2, 0.6]),
+)
+sim.run(trials=10, rounds=2000)
+print("eps=0.8: ", explore_bandit.Qs)
+print("eps=0.1: ", exploit_bandit.Qs)
+```
