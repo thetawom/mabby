@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 from typing import Optional
 
 import numpy as np
+from numpy.random import Generator
 from numpy.typing import NDArray
 
 from mabby.exceptions import BanditUsageError
@@ -28,10 +29,10 @@ class Bandit(ABC):
         self._choice = None
         self._prime(k, steps)
 
-    def choose(self) -> int:
+    def choose(self, rng: Generator) -> int:
         if not self._primed:
             raise BanditUsageError("choose() can only be called on a primed bandit")
-        self._choice = self._choose()
+        self._choice = self._choose(rng)
         return self._choice
 
     def update(self, reward: float) -> None:
@@ -51,7 +52,7 @@ class Bandit(ABC):
         pass
 
     @abstractmethod
-    def _choose(self) -> int:
+    def _choose(self, rng: Generator) -> int:
         pass
 
     @abstractmethod
@@ -77,9 +78,9 @@ class EpsilonGreedyBandit(Bandit):
         self._Qs = np.zeros(k)
         self._Ns = np.zeros(k)
 
-    def _choose(self) -> int:
-        if np.random.rand() < self.eps:
-            return np.random.randint(0, len(self._Ns))
+    def _choose(self, rng: Generator) -> int:
+        if rng.random() < self.eps:
+            return rng.integers(0, len(self._Ns))
         return int(np.argmax(self._Qs))
 
     def _update(self, choice: int, reward: float) -> None:
