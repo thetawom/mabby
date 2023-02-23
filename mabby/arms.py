@@ -22,13 +22,13 @@ class Arm(ABC):
         pass
 
     @classmethod
-    def armset(cls, **kwargs: List[float]) -> ArmSet:
+    def armset(cls, **kwargs: list[float]) -> ArmSet:
         params_dicts = [dict(zip(kwargs, t)) for t in zip(*kwargs.values())]
         return ArmSet([cls(**params) for params in params_dicts])
 
 
 class ArmSet:
-    def __init__(self, arms: List[Arm]):
+    def __init__(self, arms: list[Arm]):
         self._arms = arms
 
     def __len__(self) -> int:

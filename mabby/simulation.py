@@ -11,9 +11,7 @@ from mabby import ArmSet, Bandit
 
 
 class Simulation:
-    def __init__(
-        self, bandits: List[Bandit], armset: ArmSet, seed: Optional[int] = None
-    ):
+    def __init__(self, bandits: list[Bandit], armset: ArmSet, seed: int | None = None):
         self.bandits = bandits
         self.armset = armset
         self._rng = np.random.default_rng(seed)
