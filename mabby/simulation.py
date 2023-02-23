@@ -11,9 +11,12 @@ from mabby import ArmSet, Bandit
 
 
 class Simulation:
-    def __init__(self, bandits: List[Bandit], armset: ArmSet):
+    def __init__(
+        self, bandits: List[Bandit], armset: ArmSet, seed: Optional[int] = None
+    ):
         self.bandits = bandits
         self.armset = armset
+        self._rng = np.random.default_rng(seed)
 
     def run(self, trials: int, steps: int) -> SimStats:
         stats = SimStats(self, trials, steps)
@@ -26,7 +29,7 @@ class Simulation:
     def _run_trial(self, stats: SimStats, bandit: Bandit, steps: int) -> None:
         bandit.prime(len(self.armset), steps)
         for i in range(steps):
-            choice = bandit.choose()
+            choice = bandit.choose(self._rng)
             reward = self.armset.play(choice)
             bandit.update(reward)
             stats.update(bandit, i, choice, reward)
