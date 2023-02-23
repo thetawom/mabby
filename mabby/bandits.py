@@ -1,5 +1,6 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import Optional
 
 import numpy as np
 from numpy.random import Generator
@@ -9,10 +10,10 @@ from mabby.exceptions import BanditUsageError
 
 
 class Bandit(ABC):
-    def __init__(self, name: Optional[str] = None):
+    def __init__(self, name: str | None = None):
         self._name = name
         self._primed = False
-        self._choice: Optional[int] = None
+        self._choice: int | None = None
 
     @property
     def name(self) -> str:
@@ -65,7 +66,7 @@ class Bandit(ABC):
 
 
 class EpsilonGreedyBandit(Bandit):
-    def __init__(self, eps: float, name: Optional[str] = None):
+    def __init__(self, eps: float, name: str | None = None):
         super().__init__(name)
         if eps < 0 or eps > 1:
             raise ValueError("eps must be between 0 and 1")
