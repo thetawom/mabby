@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Iterable, List
+from collections.abc import Iterable
 
 import numpy as np
 from numpy.random import Generator
