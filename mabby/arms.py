@@ -4,6 +4,7 @@ from abc import ABC, abstractmethod
 from typing import Iterable, List
 
 import numpy as np
+from numpy.random import Generator
 
 
 class Arm(ABC):
@@ -12,7 +13,7 @@ class Arm(ABC):
         pass
 
     @abstractmethod
-    def play(self) -> float:
+    def play(self, rng: Generator) -> float:
         pass
 
     @property
@@ -42,8 +43,8 @@ class ArmSet:
     def __iter__(self) -> Iterable[Arm]:
         return iter(self._arms)
 
-    def play(self, i: int) -> float:
-        return self[i].play()
+    def play(self, i: int, rng: Generator) -> float:
+        return self[i].play(rng)
 
     def best_arm(self) -> int:
         return int(np.argmax([arm.mean for arm in self._arms]))
@@ -53,8 +54,8 @@ class BernoulliArm(Arm):
     def __init__(self, p: float):
         self.p = p
 
-    def play(self) -> int:
-        return np.random.binomial(1, self.p)
+    def play(self, rng: Generator) -> int:
+        return rng.binomial(1, self.p)
 
     @property
     def mean(self) -> float:
@@ -69,8 +70,8 @@ class GaussianArm(Arm):
         self.loc = loc
         self.scale = scale
 
-    def play(self) -> float:
-        return np.random.normal(self.loc, self.scale)
+    def play(self, rng: Generator) -> float:
+        return rng.normal(self.loc, self.scale)
 
     @property
     def mean(self) -> float:
