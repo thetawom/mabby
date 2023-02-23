@@ -1,13 +1,16 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import DefaultDict, List, Optional
+from typing import TYPE_CHECKING, DefaultDict, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import NDArray
 
-from mabby import ArmSet, Bandit
+from mabby.bandits import Bandit
+
+if TYPE_CHECKING:
+    from mabby.arms import ArmSet
 
 
 class Simulation:
@@ -68,19 +71,19 @@ class SimStats:
         self.regret[bandit] = np.cumsum(self._regret[bandit] / self._trials)
 
     def plot_rewards(self) -> None:
-        for i, (bandit, stats) in enumerate(self.rewards.items()):
+        for _, (bandit, stats) in enumerate(self.rewards.items()):
             plt.plot(stats, label=bandit.name)
         plt.legend()
         plt.show()
 
     def plot_optimality(self) -> None:
-        for i, (bandit, stats) in enumerate(self.optimality.items()):
+        for _, (bandit, stats) in enumerate(self.optimality.items()):
             plt.plot(stats, label=bandit.name)
         plt.legend()
         plt.show()
 
     def plot_regret(self) -> None:
-        for i, (bandit, stats) in enumerate(self.regret.items()):
+        for _, (bandit, stats) in enumerate(self.regret.items()):
             plt.plot(stats, label=bandit.name)
         plt.legend()
         plt.show()
