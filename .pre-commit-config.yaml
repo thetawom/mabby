@@ -15,6 +15,10 @@ repos:
       - id: check-json
       - id: check-toml
       - id: check-yaml
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v3.3.1
+    hooks:
+      - id: pyupgrade
   - repo: https://github.com/psf/black
     rev: 23.1.0
     hooks:
