@@ -30,7 +30,7 @@ class Simulation:
         bandit.prime(len(self.armset), steps)
         for i in range(steps):
             choice = bandit.choose(self._rng)
-            reward = self.armset.play(choice)
+            reward = self.armset.play(choice, self._rng)
             bandit.update(reward)
             stats.update(bandit, i, choice, reward)
 
