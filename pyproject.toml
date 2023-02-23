@@ -21,7 +21,6 @@ mdformat-black = "^0.1.1"
 mdformat-frontmatter = "^2.0.1"
 mdformat-footnote = "^0.1.1"
 mypy = "^1.0.1"
-pyupgrade = "^3.3.1"
 ruff = "^0.0.252"
 
 [tool.isort]
