@@ -130,3 +130,6 @@ dmypy.json
 
 # Ruff stuff
 .ruff_cache/
+
+# Makefile output
+.install.stamp
