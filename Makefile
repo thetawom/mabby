@@ -41,14 +41,14 @@ clean:
 lint: $(INSTALL_STAMP)
 	$(POETRY) run ruff check ./tests/ $(NAME) --exit-zero
 	$(POETRY) run black --check ./tests/ $(NAME) --diff
-	$(POETRY) run mdformat --check .
+	$(POETRY) run mdformat --check $(NAME)
 	$(POETRY) run mypy $(NAME) --ignore-missing-imports
 
 .PHONY: format
 format: $(INSTALL_STAMP)
 	$(POETRY) run ruff check --fix ./tests/ $(NAME) --exit-zero
 	$(POETRY) run black ./tests/ $(NAME)
-	$(POETRY) run mdformat .
+	$(POETRY) run mdformat $(NAME)
 
 .PHONY: test
 test: $(INSTALL_STAMP)
