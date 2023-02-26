@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 
 from mabby.arms import Arm, ArmSet, BernoulliArm, GaussianArm
@@ -31,6 +32,11 @@ class TestArm:
     def armset(self, armset_params):
         return self.ARM_CLASS.armset(**armset_params)
 
+    @pytest.fixture(params=[100000])
+    def sample(self, request, arm):
+        rng = np.random.default_rng(seed=0)
+        return [arm.play(rng) for _ in range(request.param)]
+
     def test_armset_returns_armset_with_correct_types(self, armset):
         assert isinstance(armset, ArmSet)
         for arm in armset:
@@ -55,9 +61,9 @@ class TestBernoulliArm(TestArm):
     def test_init_sets_p(self, arm, valid_params):
         assert arm.p == valid_params["p"]
 
-    def test_play_invokes_rng_binomial(self, arm, valid_params, mock_rng):
-        arm.play(mock_rng)
-        mock_rng.binomial.assert_called_once_with(1, valid_params["p"])
+    def test_play_generates_bernoulli_distribution(self, sample, valid_params):
+        assert np.logical_or(np.equal(sample, 0), np.equal(sample, 1)).any()
+        assert np.isclose(np.mean(sample), valid_params["p"], rtol=0.01)
 
     def test_mean_equals_to_p(self, arm, valid_params):
         assert arm.mean == valid_params["p"]
@@ -81,11 +87,9 @@ class TestGaussianArm(TestArm):
         assert arm.loc == valid_params["loc"]
         assert arm.scale == valid_params["scale"]
 
-    def test_play_invokes_rng_normal(self, arm, valid_params, mock_rng):
-        arm.play(mock_rng)
-        mock_rng.normal.assert_called_once_with(
-            valid_params["loc"], valid_params["scale"]
-        )
+    def test_play_generates_normal_distribution(self, sample, valid_params):
+        assert np.isclose(np.mean(sample), valid_params["loc"], rtol=0.05)
+        assert np.isclose(np.std(sample), valid_params["scale"], rtol=0.05)
 
     def test_mean_equals_to_loc(self, arm, valid_params):
         assert arm.mean == valid_params["loc"]
