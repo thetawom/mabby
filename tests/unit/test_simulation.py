@@ -1,81 +1,87 @@
+import random
 from unittest.mock import patch
 
 import pytest
 from numpy.random import Generator
 
 from mabby import Simulation
+from mabby.arms import ArmSet
 from mabby.simulation import SimStats
 
 
 class TestSimulation:
     @pytest.fixture(params=[2])
-    def mock_bandits(self, mocker, request):
-        return [mocker.MagicMock() for _ in range(request.param)]
-
-    @pytest.fixture(params=[0])
-    def mock_bandit(self, request, mock_bandits):
-        return mock_bandits[request.param]
+    def num_bandits(self, request):
+        return request.param
 
     @pytest.fixture(params=[3])
-    def mock_armset(self, mocker, request):
-        return mocker.MagicMock(__len__=lambda _: request.param)
+    def num_arms(self, request):
+        return request.param
 
     @pytest.fixture
-    def simulation(self, mock_bandits, mock_armset):
-        return Simulation(bandits=mock_bandits, armset=mock_armset)
+    def bandits(self, num_bandits, bandit_factory):
+        return [bandit_factory.generic() for _ in range(num_bandits)]
 
     @pytest.fixture
-    def mock_stats(self, mocker):
-        return mocker.MagicMock()
+    def bandit(self, bandits):
+        return random.choice(bandits)
+
+    @pytest.fixture
+    def armset(self, num_arms, arm_factory):
+        arms = [arm_factory.generic() for _ in range(num_arms)]
+        return ArmSet(arms=arms)
+
+    @pytest.fixture
+    def sim(self, bandits, armset):
+        return Simulation(bandits=bandits, armset=armset)
+
+    @pytest.fixture
+    def stats(self, mocker):
+        return mocker.Mock(spec=SimStats)
 
     @pytest.fixture(params=[{"trials": 3, "steps": 2}])
     def run_params(self, request):
         return request.param
 
-    def test_init_sets_bandits_armset_and_rng(
-        self, mock_bandits, mock_armset, simulation
-    ):
-        assert simulation.bandits == mock_bandits
-        assert simulation.armset == mock_armset
-        assert isinstance(simulation._rng, Generator)
+    def test_init_sets_bandits_armset_and_rng(self, bandits, armset, sim):
+        assert sim.bandits == bandits
+        assert sim.armset == armset
+        assert isinstance(sim._rng, Generator)
 
+    @patch.object(Simulation, "_run_trial")
     def test_run_creates_and_returns_compiled_sim_stats(
-        self, mocker, mock_bandits, simulation, run_params
+        self, _, mocker, sim, run_params
     ):
-        mocker.patch.object(simulation, "_run_trial")
-        stats_init = mocker.spy(SimStats, "__init__")
-        stats_compile = mocker.spy(SimStats, "compile_all")
-        stats = simulation.run(**run_params)
-        stats_init.assert_called_once()
-        stats_compile.assert_called_once()
+        init_stats = mocker.spy(SimStats, "__init__")
+        compile_stats = mocker.spy(SimStats, "compile_all")
+        stats = sim.run(**run_params)
+        assert init_stats.call_count == 1
+        assert compile_stats.call_count == 1
         assert isinstance(stats, SimStats)
 
+    @patch.object(Simulation, "_run_trial")
     def test_run_invokes__run_trial_correct_number_of_times(
-        self, mock_bandits, simulation, run_params
+        self, run_trial, bandits, sim, run_params
     ):
-        with patch.object(simulation, "_run_trial") as run_trials:
-            simulation.run(**run_params)
-            assert run_trials.call_count == len(mock_bandits) * run_params["trials"]
+        sim.run(**run_params)
+        total_trials = len(bandits) * run_params["trials"]
+        assert run_trial.call_count == total_trials
 
     def test__run_trial_primes_bandit(
-        self, mocker, mock_bandit, mock_armset, mock_stats, simulation, run_params
+        self, mocker, bandit, armset, stats, sim, run_params
     ):
-        bandit_prime = mocker.spy(mock_bandit, "prime")
-        simulation._run_trial(
-            stats=mock_stats, bandit=mock_bandit, steps=run_params["steps"]
-        )
-        bandit_prime.assert_called_once_with(len(mock_armset), run_params["steps"])
+        bandit_prime = mocker.spy(bandit, "prime")
+        sim._run_trial(stats=stats, bandit=bandit, steps=run_params["steps"])
+        bandit_prime.assert_called_once_with(k=len(armset), steps=run_params["steps"])
 
     def test__run_trial_runs_sim_loop(
-        self, mocker, mock_bandit, mock_armset, mock_stats, simulation, run_params
+        self, mocker, bandit, armset, stats, sim, run_params
     ):
-        bandit_choose = mocker.spy(mock_bandit, "choose")
-        armset_play = mocker.spy(mock_armset, "play")
-        bandit_update = mocker.spy(mock_bandit, "update")
-        stats_update = mocker.spy(mock_stats, "update")
-        simulation._run_trial(
-            stats=mock_stats, bandit=mock_bandit, steps=run_params["steps"]
-        )
+        bandit_choose = mocker.spy(bandit, "choose")
+        armset_play = mocker.spy(armset, "play")
+        bandit_update = mocker.spy(bandit, "update")
+        stats_update = mocker.spy(stats, "update")
+        sim._run_trial(stats=stats, bandit=bandit, steps=run_params["steps"])
         assert bandit_choose.call_count == run_params["steps"]
         assert armset_play.call_count == run_params["steps"]
         assert bandit_update.call_count == run_params["steps"]
