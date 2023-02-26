@@ -5,7 +5,7 @@ from mabby.arms import Arm, ArmSet, BernoulliArm, GaussianArm
 
 @pytest.fixture()
 def mock_rng(mocker):
-    return mocker.MagicMock()
+    return mocker.Mock()
 
 
 class TestArm:
@@ -98,7 +98,7 @@ class TestGaussianArm(TestArm):
 class TestArmSet:
     @pytest.fixture(params=[[1, 3], [0.2, 0.7, 0.3]])
     def mock_arms(self, mocker, request):
-        return [mocker.MagicMock(mean=m) for m in request.param]
+        return [mocker.Mock(mean=m) for m in request.param]
 
     @pytest.fixture()
     def mock_armset(self, mock_arms):

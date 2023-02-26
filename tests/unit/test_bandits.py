@@ -7,7 +7,7 @@ from mabby.exceptions import BanditUsageError
 
 @pytest.fixture
 def mock_rng(mocker):
-    return mocker.MagicMock(random=lambda: 0.5)
+    return mocker.Mock(random=lambda: 0.5)
 
 
 class TestBandit:
@@ -151,14 +151,14 @@ class TestEpsilonGreedyBandit(TestBandit):
     def test__choose_explores_with_low_rng(
         self, mocker, valid_params, prime_params, primed_bandit
     ):
-        mock_rng = mocker.MagicMock(random=lambda: 0.9 * valid_params["eps"])
+        mock_rng = mocker.Mock(random=lambda: 0.9 * valid_params["eps"])
         primed_bandit._choose(mock_rng)
         mock_rng.integers.assert_called_once_with(0, prime_params["k"])
 
     def test__choose_exploits_with_high_rng(
         self, mocker, valid_params, primed_bandit, Qs
     ):
-        mock_rng = mocker.MagicMock(random=lambda: 1.1 * valid_params["eps"])
+        mock_rng = mocker.Mock(random=lambda: 1.1 * valid_params["eps"])
         primed_bandit._Qs = Qs
         choice = primed_bandit._choose(mock_rng)
         assert Qs[choice] == max(Qs)
