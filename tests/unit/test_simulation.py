@@ -57,6 +57,11 @@ class TestSimulation:
         assert sim.armset == armset
         assert isinstance(sim._rng, Generator)
 
+    def test_init_with_empty_armset_raises_error(self, bandits):
+        empty_armset = ArmSet(arms=[])
+        with pytest.raises(ValueError):
+            Simulation(bandits=bandits, armset=empty_armset)
+
     @patch.object(Simulation, "_run_trial")
     def test_run_creates_and_returns_compiled_sim_stats(
         self, _, mocker, sim, run_params
