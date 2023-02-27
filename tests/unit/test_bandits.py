@@ -17,6 +17,10 @@ class TestBandit:
     def patch_abstract_methods(self, mocker):
         mocker.patch.object(Bandit, "__abstractmethods__", new_callable=set)
 
+    @pytest.fixture(autouse=True, params=["default-name"])
+    def patch_bandit_default_name(self, mocker, request):
+        mocker.patch.object(Bandit, "default_name", return_value=request.param)
+
     @pytest.fixture(params=[{}, {"name": "bandit-name"}])
     def valid_params(self, request):
         return request.param
@@ -65,16 +69,16 @@ class TestBandit:
         bandit = self.BANDIT_CLASS(**valid_params)
         assert bandit.name == name
 
-    @pytest.mark.parametrize("default_name", ["default"])
-    def test_name_returns_default_name_if_not_overridden(
-        self, mocker, valid_params, default_name
-    ):
-        mocker.patch.object(
-            self.BANDIT_CLASS, "default_name", return_value=default_name
-        )
+    def test_name_returns_default_name_if_not_overridden(self, valid_params):
         valid_params["name"] = None
         bandit = self.BANDIT_CLASS(**valid_params)
-        assert bandit.name == default_name
+        assert bandit.name == bandit.default_name()
+
+    def test_str_returns_name(self, bandit):
+        assert str(bandit) == bandit.name
+
+    def test_repr_returns_default_name(self, bandit):
+        assert repr(bandit) == bandit.default_name()
 
     def test_prime_invokes__prime(self, mocker, bandit, prime_params):
         spy = mocker.spy(bandit, "_prime")
