@@ -77,4 +77,4 @@ deep-clean: ## remove all untracked files
 .PHONY: clean
 clean: ## remove all temporary files
 	find . -type d -name "__pycache__" | xargs rm -rf {};
-	rm -rf $(INSTALL_STAMP) .coverage coverage cover htmlcov logs build dist *.egg-info .mypy_cache .pytest_cache .ruff_cache
+	rm -rf $(INSTALL_STAMP) .coverage coverage *.lcov cover htmlcov logs build dist *.egg-info .mypy_cache .pytest_cache .ruff_cache
