@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import TYPE_CHECKING, DefaultDict, Optional
+from typing import TYPE_CHECKING, DefaultDict
 
 import matplotlib.pyplot as plt
 import numpy as np
 from numpy.typing import NDArray
 
 from mabby.bandits import Bandit
+from mabby.exceptions import SimulationUsageError
 
 if TYPE_CHECKING:
     from mabby.arms import ArmSet
@@ -24,8 +25,7 @@ class Simulation:
         for bandit in self.bandits:
             for _ in range(trials):
                 self._run_trial(stats, bandit, steps)
-        stats.compile_all()
-        return stats
+        return stats.compile()
 
     def _run_trial(self, stats: SimStats, bandit: Bandit, steps: int) -> None:
         bandit.prime(len(self.armset), steps)
@@ -36,7 +36,6 @@ class Simulation:
             stats.update(bandit, i, choice, reward)
 
 
-SimStatOpt = DefaultDict[Bandit, Optional[NDArray[np.float64]]]
 SimStat = DefaultDict[Bandit, NDArray[np.float64]]
 
 
@@ -45,30 +44,47 @@ class SimStats:
         self._sim = simulation
         self._trials = trials
 
-        self.rewards: SimStatOpt = defaultdict(lambda: None)
-        self.optimality: SimStatOpt = defaultdict(lambda: None)
-        self.regret: SimStatOpt = defaultdict(lambda: None)
-
         self._rewards: SimStat = defaultdict(lambda: np.zeros(steps))
         self._optimality: SimStat = defaultdict(lambda: np.zeros(steps))
         self._regret: SimStat = defaultdict(lambda: np.zeros(steps))
 
+        self._compiled = False
+
+    @property
+    def rewards(self) -> SimStat:
+        if not self._compiled:
+            raise SimulationUsageError("stats have not been compiled")
+        return self._rewards
+
+    @property
+    def optimality(self) -> SimStat:
+        if not self._compiled:
+            raise SimulationUsageError("stats have not been compiled")
+        return self._optimality
+
+    @property
+    def regret(self) -> SimStat:
+        if not self._compiled:
+            raise SimulationUsageError("stats have not been compiled")
+        return self._regret
+
     def update(self, bandit: Bandit, i: int, choice: int, reward: float) -> None:
-        best_arm = self._sim.armset.best_arm()
+        opt_arm = self._sim.armset.best_arm()
         self._rewards[bandit][i] += reward
-        self._optimality[bandit][i] += int(best_arm == choice)
+        self._optimality[bandit][i] += int(opt_arm == choice)
         self._regret[bandit][i] += (
-            self._sim.armset[best_arm].mean - self._sim.armset[choice].mean
+            self._sim.armset[opt_arm].mean - self._sim.armset[choice].mean
         )
+        self._compiled = False
 
-    def compile_all(self) -> None:
-        for bandit in self._sim.bandits:
-            self.compile_for_bandit(bandit)
-
-    def compile_for_bandit(self, bandit: Bandit) -> None:
-        self.rewards[bandit] = self._rewards[bandit] / self._trials
-        self.optimality[bandit] = self._optimality[bandit] / self._trials
-        self.regret[bandit] = np.cumsum(self._regret[bandit] / self._trials)
+    def compile(self) -> SimStats:
+        if not self._compiled:
+            for bandit in self._sim.bandits:
+                self._rewards[bandit] /= self._trials
+                self._optimality[bandit] /= self._trials
+                self._regret[bandit] = np.cumsum(self._regret[bandit] / self._trials)
+            self._compiled = True
+        return self
 
     def plot_rewards(self) -> None:
         for _, (bandit, stats) in enumerate(self.rewards.items()):
