@@ -25,6 +25,12 @@ class Bandit(ABC):
     def default_name(self) -> str:
         pass
 
+    def __str__(self) -> str:
+        return self.name
+
+    def __repr__(self) -> str:
+        return self.default_name()
+
     def prime(self, k: int, steps: int) -> None:
         self._primed = True
         self._choice = None
