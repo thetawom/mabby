@@ -28,6 +28,10 @@ class TestArm:
     def armset_params(self, request):
         return request.param
 
+    @pytest.fixture(params=[{}, {"x": []}, {"y": [1], "z": []}])
+    def invalid_armset_params(self, request):
+        return request.param
+
     @pytest.fixture
     def armset(self, armset_params):
         return self.ARM_CLASS.armset(**armset_params)
@@ -45,6 +49,10 @@ class TestArm:
     def test_armset_returns_armset_with_correct_length(self, armset_params, armset):
         expected_armset_length = min([len(v) for v in armset_params.values()])
         assert len(armset) == expected_armset_length
+
+    def test_armset_with_insufficient_params_raises_error(self, invalid_armset_params):
+        with pytest.raises(ValueError):
+            self.ARM_CLASS.armset(**invalid_armset_params)
 
 
 class TestBernoulliArm(TestArm):

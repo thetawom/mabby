@@ -24,6 +24,8 @@ class Arm(ABC):
     @classmethod
     def armset(cls, **kwargs: list[float]) -> ArmSet:
         params_dicts = [dict(zip(kwargs, t)) for t in zip(*kwargs.values())]
+        if len(params_dicts) == 0:
+            raise ValueError("insufficient parameters to create an arm")
         return ArmSet([cls(**params) for params in params_dicts])
 
 

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from collections.abc import Iterable
 from typing import TYPE_CHECKING, DefaultDict
 
 import matplotlib.pyplot as plt
@@ -15,8 +16,12 @@ if TYPE_CHECKING:
 
 
 class Simulation:
-    def __init__(self, bandits: list[Bandit], armset: ArmSet, seed: int | None = None):
+    def __init__(
+        self, bandits: Iterable[Bandit], armset: ArmSet, seed: int | None = None
+    ):
         self.bandits = bandits
+        if len(armset) == 0:
+            raise ValueError("ArmSet cannot be empty")
         self.armset = armset
         self._rng = np.random.default_rng(seed)
 
