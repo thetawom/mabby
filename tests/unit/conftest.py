@@ -3,24 +3,25 @@ import pytest
 from numpy.random import Generator
 from numpy.typing import NDArray
 
+from mabby import Bandit
 from mabby.arms import Arm
-from mabby.bandits import Bandit
+from mabby.strategies import Strategy
 
 
-class GenericBandit(Bandit):
-    def default_name(self) -> str:
-        return ""
+class GenericStrategy(Strategy):
+    k: int
 
-    def _prime(self, k: int, steps: int) -> None:
+    def prime(self, k: int, steps: int) -> None:
         self.k = k
 
-    def _choose(self, rng: Generator) -> int:
+    def choose(self, rng: Generator) -> int:
         return 0
 
-    def _update(self, choice: int, reward: float) -> None:
+    def update(self, choice: int, reward: float) -> None:
         pass
 
-    def _compute_Qs(self) -> NDArray[np.float64]:
+    @property
+    def Qs(self) -> NDArray[np.float64]:
         return np.zeros(self.k)
 
 
@@ -41,7 +42,8 @@ def bandit_factory():
     class GenericBanditFactory:
         @staticmethod
         def generic():
-            return GenericBandit()
+            strategy = GenericStrategy()
+            return Bandit(strategy=strategy)
 
     return GenericBanditFactory
 
