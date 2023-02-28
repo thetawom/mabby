@@ -20,7 +20,7 @@ class GenericBandit(Bandit):
     def _update(self, choice: int, reward: float) -> None:
         pass
 
-    def compute_Qs(self) -> NDArray[np.float64]:
+    def _compute_Qs(self) -> NDArray[np.float64]:
         return np.zeros(self.k)
 
 
