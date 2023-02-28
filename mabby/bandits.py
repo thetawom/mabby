@@ -52,7 +52,7 @@ class Bandit(ABC):
     def Qs(self) -> NDArray[np.float64]:
         if not self._primed:
             raise BanditUsageError("bandit has no Q values before it is run")
-        return self.compute_Qs()
+        return self._compute_Qs()
 
     @abstractmethod
     def _prime(self, k: int, steps: int) -> None:
@@ -67,11 +67,44 @@ class Bandit(ABC):
         pass
 
     @abstractmethod
-    def compute_Qs(self) -> NDArray[np.float64]:
+    def _compute_Qs(self) -> NDArray[np.float64]:
         pass
 
 
-class EpsilonGreedyBandit(Bandit):
+class SemiUniformBandit(Bandit, ABC):
+    def __init__(self, name: str | None = None):
+        super().__init__(name)
+
+    @abstractmethod
+    def _effective_eps(self) -> float:
+        pass
+
+    def _prime(self, k: int, steps: int) -> None:
+        self._Qs = np.zeros(k)
+        self._Ns = np.zeros(k)
+
+    def _choose(self, rng: Generator) -> int:
+        if rng.random() < self._effective_eps():
+            return rng.integers(0, len(self._Ns))
+        return int(np.argmax(self._Qs))
+
+    def _update(self, choice: int, reward: float) -> None:
+        self._Ns[choice] += 1
+        self._Qs[choice] += (reward - self._Qs[choice]) / self._Ns[choice]
+
+    def _compute_Qs(self) -> NDArray[np.float64]:
+        return self._Qs
+
+
+class RandomBandit(SemiUniformBandit):
+    def default_name(self) -> str:
+        return "random bandit"
+
+    def _effective_eps(self) -> float:
+        return 1
+
+
+class EpsilonGreedyBandit(SemiUniformBandit):
     def __init__(self, eps: float, name: str | None = None):
         super().__init__(name)
         if eps < 0 or eps > 1:
@@ -81,18 +114,5 @@ class EpsilonGreedyBandit(Bandit):
     def default_name(self) -> str:
         return f"epsilon-greedy (eps={self.eps})"
 
-    def _prime(self, k: int, steps: int) -> None:
-        self._Qs = np.zeros(k)
-        self._Ns = np.zeros(k)
-
-    def _choose(self, rng: Generator) -> int:
-        if rng.random() < self.eps:
-            return rng.integers(0, len(self._Ns))
-        return int(np.argmax(self._Qs))
-
-    def _update(self, choice: int, reward: float) -> None:
-        self._Ns[choice] += 1
-        self._Qs[choice] += (reward - self._Qs[choice]) / self._Ns[choice]
-
-    def compute_Qs(self) -> NDArray[np.float64]:
-        return self._Qs
+    def _effective_eps(self) -> float:
+        return self.eps

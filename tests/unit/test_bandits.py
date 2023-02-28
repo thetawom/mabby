@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from mabby.bandits import Bandit, EpsilonGreedyBandit
+from mabby.bandits import Bandit, EpsilonGreedyBandit, RandomBandit, SemiUniformBandit
 from mabby.exceptions import BanditUsageError
 
 
@@ -21,7 +21,7 @@ class TestBandit:
     def patch_bandit_default_name(self, mocker, request):
         mocker.patch.object(Bandit, "default_name", return_value=request.param)
 
-    @pytest.fixture(params=[{}, {"name": "bandit-name"}])
+    @pytest.fixture(params=[{"name": "bandit-name"}])
     def valid_params(self, request):
         return request.param
 
@@ -108,7 +108,7 @@ class TestBandit:
 
     @pytest.mark.parametrize("Qs", [[1, 2]])
     def test_Qs_returns_computed_Qs(self, mocker, primed_bandit, Qs):
-        mocker.patch.object(primed_bandit, "compute_Qs", return_value=Qs)
+        mocker.patch.object(primed_bandit, "_compute_Qs", return_value=Qs)
         assert primed_bandit.Qs == Qs
 
     def test_choose_before_prime_raises_error(self, bandit, mock_rng):
@@ -124,24 +124,31 @@ class TestBandit:
             primed_bandit.update(reward=reward)
 
 
-class TestEpsilonGreedyBandit(TestBandit):
-    BANDIT_CLASS = EpsilonGreedyBandit
+class TestSemiUniformBandit(TestBandit):
+    BANDIT_CLASS = SemiUniformBandit
 
-    @pytest.fixture(params=[{"eps": 0.1}, {"eps": 0.3, "name": "bandit-name"}])
-    def valid_params(self, request):
-        return request.param
+    @pytest.fixture(autouse=True, scope="session")
+    def patch_abstract_methods(self, session_mocker):
+        session_mocker.patch.object(
+            SemiUniformBandit, "__abstractmethods__", new_callable=set
+        )
 
-    @pytest.fixture(params=[{"eps": -1}, {"eps": 1.2}])
-    def invalid_params(self, request):
+    @pytest.fixture(autouse=True, scope="session", params=["default-name"])
+    def patch_bandit_default_name(self, session_mocker, request):
+        session_mocker.patch.object(
+            SemiUniformBandit, "default_name", return_value=request.param
+        )
+
+    @pytest.fixture(autouse=True, params=[0.5, 1])
+    def effective_eps(self, mocker, request):
+        mocker.patch.object(
+            SemiUniformBandit, "_effective_eps", return_value=request.param
+        )
         return request.param
 
     @pytest.fixture(params=[[0.1, 0.5, 0.2], [2, 0]])
     def Qs(self, request):
         return request.param
-
-    def test_default_name_contains_eps(self, valid_params, bandit):
-        eps = valid_params["eps"]
-        assert str(eps) in bandit.default_name()
 
     def test__prime_inits__Qs_and__Ns(self, prime_params, primed_bandit):
         k = prime_params["k"]
@@ -153,16 +160,16 @@ class TestEpsilonGreedyBandit(TestBandit):
         assert not primed_bandit._Ns.any()
 
     def test__choose_explores_with_low_rng(
-        self, mocker, valid_params, prime_params, primed_bandit
+        self, mocker, effective_eps, prime_params, primed_bandit
     ):
-        mock_rng = mocker.Mock(random=lambda: 0.9 * valid_params["eps"])
+        mock_rng = mocker.Mock(random=lambda: 0.9 * effective_eps)
         primed_bandit._choose(mock_rng)
         mock_rng.integers.assert_called_once_with(0, prime_params["k"])
 
     def test__choose_exploits_with_high_rng(
-        self, mocker, valid_params, primed_bandit, Qs
+        self, mocker, effective_eps, primed_bandit, Qs
     ):
-        mock_rng = mocker.Mock(random=lambda: 1.1 * valid_params["eps"])
+        mock_rng = mocker.Mock(random=lambda: 1.1 * effective_eps)
         primed_bandit._Qs = Qs
         choice = primed_bandit._choose(mock_rng)
         assert Qs[choice] == max(Qs)
@@ -177,4 +184,33 @@ class TestEpsilonGreedyBandit(TestBandit):
 
     def test_compute_Qs_returns_Qs(self, primed_bandit, Qs):
         primed_bandit._Qs = Qs
-        assert primed_bandit.compute_Qs() == primed_bandit._Qs
+        assert primed_bandit._compute_Qs() == primed_bandit._Qs
+
+
+class TestRandomBandit(TestBandit):
+    BANDIT_CLASS = RandomBandit
+
+    def test_default_name_equals_random_bandit(self, bandit):
+        assert "random" in bandit.default_name()
+
+    def test_effective_eps_equals_1(self, bandit):
+        assert bandit._effective_eps() == 1
+
+
+class TestEpsilonGreedyBandit(TestBandit):
+    BANDIT_CLASS = EpsilonGreedyBandit
+
+    @pytest.fixture(params=[{"eps": 0.1}])
+    def valid_params(self, request):
+        return request.param
+
+    @pytest.fixture(params=[{"eps": -1}, {"eps": 1.2}])
+    def invalid_params(self, request):
+        return request.param
+
+    def test_default_name_contains_eps(self, valid_params, bandit):
+        eps = valid_params["eps"]
+        assert str(eps) in bandit.default_name()
+
+    def test_effective_eps_equals_eps(self, valid_params, bandit):
+        assert bandit._effective_eps() == valid_params["eps"]
