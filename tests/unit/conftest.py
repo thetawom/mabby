@@ -38,11 +38,21 @@ class GenericArm(Arm):
 
 
 @pytest.fixture
-def bandit_factory():
+def strategy_factory():
+    class GenericStrategyFactory:
+        @staticmethod
+        def generic():
+            return GenericStrategy()
+
+    return GenericStrategyFactory
+
+
+@pytest.fixture
+def bandit_factory(strategy_factory):
     class GenericBanditFactory:
         @staticmethod
         def generic():
-            strategy = GenericStrategy()
+            strategy = strategy_factory.generic()
             return Bandit(strategy=strategy)
 
     return GenericBanditFactory

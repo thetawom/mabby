@@ -1,37 +1,18 @@
-import numpy as np
 import pytest
+from numpy.random import Generator
 
-from mabby.bandits import Bandit, EpsilonGreedyBandit, RandomBandit, SemiUniformBandit
+from mabby.bandits import Bandit, EpsilonGreedyBandit, RandomBandit
 from mabby.exceptions import BanditUsageError
-
-
-@pytest.fixture
-def mock_rng(mocker):
-    return mocker.Mock(random=lambda: 0.5)
+from mabby.strategies import EpsilonGreedyStrategy, RandomStrategy
 
 
 class TestBandit:
     BANDIT_CLASS = Bandit
 
-    @pytest.fixture(autouse=True)
-    def patch_abstract_methods(self, mocker):
-        mocker.patch.object(Bandit, "__abstractmethods__", new_callable=set)
-
-    @pytest.fixture(autouse=True, params=["default-name"])
-    def patch_bandit_default_name(self, mocker, request):
-        mocker.patch.object(Bandit, "default_name", return_value=request.param)
-
-    @pytest.fixture(params=[{"name": "bandit-name"}])
-    def valid_params(self, request):
+    @pytest.fixture(params=[{}, {"name": "bandit-name"}])
+    def valid_params(self, request, strategy_factory):
+        request.param["strategy"] = strategy_factory.generic()
         return request.param
-
-    @pytest.fixture(params=[])
-    def invalid_params(self, request):
-        return request.param
-
-    @pytest.fixture
-    def bandit(self, valid_params):
-        return self.BANDIT_CLASS(**valid_params)
 
     @pytest.fixture(params=[{"k": 3, "steps": 20}])
     def prime_params(self, request):
@@ -46,72 +27,67 @@ class TestBandit:
         return request.param
 
     @pytest.fixture
-    def primed_bandit(self, bandit, prime_params):
-        bandit.prime(k=prime_params["k"], steps=prime_params["steps"])
+    def bandit(self, valid_params):
+        return self.BANDIT_CLASS(**valid_params)
+
+    @pytest.fixture
+    def primed_bandit(self, prime_params, bandit):
+        bandit.prime(**prime_params)
         return bandit
 
     @pytest.fixture
-    def chosen_bandit(self, mocker, primed_bandit, mock_rng, choice):
-        mocker.patch.object(primed_bandit, "_choose", return_value=choice)
-        primed_bandit.choose(mock_rng)
+    def chosen_bandit(self, choice, primed_bandit):
+        primed_bandit._choice = choice
         return primed_bandit
 
     def test_init_sets_name(self, valid_params, bandit):
         assert bandit._name == valid_params.get("name")
 
-    def test_init_raises_error_with_invalid_params(self, invalid_params):
-        with pytest.raises(ValueError):
-            self.BANDIT_CLASS(**invalid_params)
-
-    @pytest.mark.parametrize("name", ["name"])
-    def test_name_returns_custom_name_if_overridden(self, valid_params, name):
+    @pytest.mark.parametrize("name", ["bandit-name"])
+    def test_repr_returns_custom_name_if_overridden(self, valid_params, name):
         valid_params["name"] = name
         bandit = self.BANDIT_CLASS(**valid_params)
-        assert bandit.name == name
+        assert repr(bandit) == name
 
-    def test_name_returns_default_name_if_not_overridden(self, valid_params):
+    def test_repr_returns_strategy_name_if_not_overridden(self, valid_params):
         valid_params["name"] = None
         bandit = self.BANDIT_CLASS(**valid_params)
-        assert bandit.name == bandit.default_name()
+        assert repr(bandit) == str(bandit.strategy)
 
-    def test_str_returns_name(self, bandit):
-        assert str(bandit) == bandit.name
-
-    def test_repr_returns_default_name(self, bandit):
-        assert repr(bandit) == bandit.default_name()
-
-    def test_prime_invokes__prime(self, mocker, bandit, prime_params):
-        spy = mocker.spy(bandit, "_prime")
+    def test_prime_invokes_strategy_prime(self, mocker, bandit, prime_params):
+        strategy_prime = mocker.spy(bandit.strategy, "prime")
         bandit.prime(**prime_params)
-        assert spy.call_count == 1
+        strategy_prime.assert_called_once_with(**prime_params)
 
-    def test_choose_invokes__choose(self, mocker, primed_bandit, mock_rng):
-        spy = mocker.spy(primed_bandit, "_choose")
+    def test_choose_invokes_strategy_choose(self, mocker, primed_bandit, choice):
+        mock_rng = mocker.Mock(spec=Generator)
+        mocker.patch.object(primed_bandit.strategy, "choose", return_value=choice)
+        strategy_choose = mocker.spy(primed_bandit.strategy, "choose")
         primed_bandit.choose(mock_rng)
-        assert spy.call_count == 1
+        strategy_choose.assert_called_once_with(mock_rng)
 
-    def test_choose_saves_and_returns_choice(
-        self, mocker, primed_bandit, mock_rng, choice
-    ):
-        mocker.patch.object(primed_bandit, "_choose", return_value=choice)
+    def test_choose_saves_and_returns_choice(self, mocker, primed_bandit, choice):
+        mock_rng = mocker.Mock(spec=Generator)
+        mocker.patch.object(primed_bandit.strategy, "choose", return_value=choice)
         assert primed_bandit.choose(mock_rng) == choice
         assert primed_bandit._choice == choice
 
-    def test_update_invokes__update(self, mocker, chosen_bandit, reward):
-        spy = mocker.spy(chosen_bandit, "_update")
+    def test_update_invokes_strategy_update(
+        self, mocker, chosen_bandit, choice, reward
+    ):
+        strategy_update = mocker.spy(chosen_bandit.strategy, "update")
         chosen_bandit.update(reward)
-        assert spy.call_count == 1
+        strategy_update.assert_called_once_with(choice, reward)
 
     def test_update_resets_choice_to_none(self, chosen_bandit, reward):
         chosen_bandit.update(reward)
         assert chosen_bandit._choice is None
 
-    @pytest.mark.parametrize("Qs", [[1, 2]])
-    def test_Qs_returns_computed_Qs(self, mocker, primed_bandit, Qs):
-        mocker.patch.object(primed_bandit, "_compute_Qs", return_value=Qs)
-        assert primed_bandit.Qs == Qs
+    def test_Qs_returns_strategy_Qs(self, primed_bandit):
+        assert (primed_bandit.Qs == primed_bandit.strategy.Qs).all()
 
-    def test_choose_before_prime_raises_error(self, bandit, mock_rng):
+    def test_choose_before_prime_raises_error(self, mocker, bandit):
+        mock_rng = mocker.Mock(spec=Generator)
         with pytest.raises(BanditUsageError):
             bandit.choose(rng=mock_rng)
 
@@ -124,93 +100,23 @@ class TestBandit:
             primed_bandit.update(reward=reward)
 
 
-class TestSemiUniformBandit(TestBandit):
-    BANDIT_CLASS = SemiUniformBandit
-
-    @pytest.fixture(autouse=True, scope="session")
-    def patch_abstract_methods(self, session_mocker):
-        session_mocker.patch.object(
-            SemiUniformBandit, "__abstractmethods__", new_callable=set
-        )
-
-    @pytest.fixture(autouse=True, scope="session", params=["default-name"])
-    def patch_bandit_default_name(self, session_mocker, request):
-        session_mocker.patch.object(
-            SemiUniformBandit, "default_name", return_value=request.param
-        )
-
-    @pytest.fixture(autouse=True, params=[0.5, 1])
-    def effective_eps(self, mocker, request):
-        mocker.patch.object(
-            SemiUniformBandit, "_effective_eps", return_value=request.param
-        )
-        return request.param
-
-    @pytest.fixture(params=[[0.1, 0.5, 0.2], [2, 0]])
-    def Qs(self, request):
-        return request.param
-
-    def test__prime_inits__Qs_and__Ns(self, prime_params, primed_bandit):
-        k = prime_params["k"]
-        assert isinstance(primed_bandit._Qs, np.ndarray)
-        assert isinstance(primed_bandit._Ns, np.ndarray)
-        assert len(primed_bandit._Qs) == k
-        assert len(primed_bandit._Ns) == k
-        assert not primed_bandit._Qs.any()
-        assert not primed_bandit._Ns.any()
-
-    def test__choose_explores_with_low_rng(
-        self, mocker, effective_eps, prime_params, primed_bandit
-    ):
-        mock_rng = mocker.Mock(random=lambda: 0.9 * effective_eps)
-        primed_bandit._choose(mock_rng)
-        mock_rng.integers.assert_called_once_with(0, prime_params["k"])
-
-    def test__choose_exploits_with_high_rng(
-        self, mocker, effective_eps, primed_bandit, Qs
-    ):
-        mock_rng = mocker.Mock(random=lambda: 1.1 * effective_eps)
-        primed_bandit._Qs = Qs
-        choice = primed_bandit._choose(mock_rng)
-        assert Qs[choice] == max(Qs)
-
-    def test__update_updates__Qs_and__Ns(
-        self, choice, prime_params, chosen_bandit, reward
-    ):
-        chosen_bandit._Ns = np.ones(prime_params["k"])
-        chosen_bandit._update(choice, reward)
-        assert chosen_bandit._Qs[choice] == reward / 2
-        assert chosen_bandit._Ns[choice] == 2
-
-    def test_compute_Qs_returns_Qs(self, primed_bandit, Qs):
-        primed_bandit._Qs = Qs
-        assert primed_bandit._compute_Qs() == primed_bandit._Qs
-
-
 class TestRandomBandit(TestBandit):
     BANDIT_CLASS = RandomBandit
 
-    def test_default_name_equals_random_bandit(self, bandit):
-        assert "random" in bandit.default_name()
+    @pytest.fixture(params=[{}, {"name": "bandit-name"}])
+    def valid_params(self, request):
+        return request.param
 
-    def test_effective_eps_equals_1(self, bandit):
-        assert bandit._effective_eps() == 1
+    def test_init_sets_random_strategy(self, bandit):
+        assert isinstance(bandit.strategy, RandomStrategy)
 
 
 class TestEpsilonGreedyBandit(TestBandit):
     BANDIT_CLASS = EpsilonGreedyBandit
 
-    @pytest.fixture(params=[{"eps": 0.1}])
+    @pytest.fixture(params=[{"eps": 0.2}, {"eps": 0.5, "name": "bandit-name"}])
     def valid_params(self, request):
         return request.param
 
-    @pytest.fixture(params=[{"eps": -1}, {"eps": 1.2}])
-    def invalid_params(self, request):
-        return request.param
-
-    def test_default_name_contains_eps(self, valid_params, bandit):
-        eps = valid_params["eps"]
-        assert str(eps) in bandit.default_name()
-
-    def test_effective_eps_equals_eps(self, valid_params, bandit):
-        assert bandit._effective_eps() == valid_params["eps"]
+    def test_init_sets_epsilon_greedy_strategy(self, bandit):
+        assert isinstance(bandit.strategy, EpsilonGreedyStrategy)
