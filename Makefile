@@ -25,6 +25,7 @@ lint: $(INSTALL_STAMP) ## run code linters
 	$(POETRY) run ruff check ./tests/ $(NAME) --exit-zero
 	$(POETRY) run black --check ./tests/ $(NAME) --diff
 	$(POETRY) run mdformat --check $(NAME)
+	$(POETRY) run pyproject-fmt --check ./pyproject.toml
 	$(POETRY) run mypy $(NAME) --ignore-missing-imports
 
 .PHONY: lints
@@ -34,7 +35,8 @@ lints: lint
 format: $(INSTALL_STAMP) ## reformat code
 	$(POETRY) run ruff check --fix ./tests/ $(NAME) --exit-zero
 	$(POETRY) run black ./tests/ $(NAME)
-	$(POETRY) run mdformat $(NAME)
+	$(POETRY) run mdformat ./tests/ $(NAME)
+	$(POETRY) run pyproject-fmt ./pyproject.toml
 
 .PHONY: fix
 fix: format
