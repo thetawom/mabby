@@ -13,20 +13,20 @@ class Strategy(ABC):
 
     @abstractmethod
     def prime(self, k: int, steps: int) -> None:
-        pass
+        """Set up bandit before a trial run"""
 
     @abstractmethod
     def choose(self, rng: Generator) -> int:
-        pass
+        """Choose an arm to play"""
 
     @abstractmethod
     def update(self, choice: int, reward: float) -> None:
-        pass
+        """Update estimates based on reward observation"""
 
     @property
     @abstractmethod
     def Qs(self) -> NDArray[np.float64]:
-        pass
+        """Compute action value estimates for each arm"""
 
 
 class SemiUniformStrategy(Strategy, ABC):
@@ -61,7 +61,7 @@ class SemiUniformStrategy(Strategy, ABC):
 
     @abstractmethod
     def effective_eps(self) -> float:
-        pass
+        """Compute effective epsilon value"""
 
 
 class RandomStrategy(SemiUniformStrategy):
