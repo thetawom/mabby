@@ -62,7 +62,7 @@ test-unit: unit
 
 .PHONY: integration
 integration: $(INSTALL_STAMP) ## run all integration tests
-	$(POETRY) run pytest ./tests/integration/ $(NAME)
+	$(POETRY) run pytest -n auto ./tests/integration/ $(NAME)
 
 .PHONY: test-integration
 test-integration: integration
