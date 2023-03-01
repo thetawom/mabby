@@ -25,6 +25,7 @@ ruff = "^0.0.252"
 pytest = "^7.2.1"
 pytest-cov = "^4.0.0"
 pytest-mock = "^3.10.0"
+pyproject-fmt = "^0.9.1"
 
 [tool.isort]
 profile = "black"
