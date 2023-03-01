@@ -1021,6 +1021,26 @@ files = [
 diagrams = ["jinja2", "railroad-diagrams"]
 
 [[package]]
+name = "pyproject-fmt"
+version = "0.9.1"
+description = "Format your pyproject.toml file"
+category = "dev"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "pyproject_fmt-0.9.1-py3-none-any.whl", hash = "sha256:45ba6640a4489dce00ffed715b0e179703959c51731e294e97b4b76c28a97eb6"},
+    {file = "pyproject_fmt-0.9.1.tar.gz", hash = "sha256:45404db8d5a0ea7b87d3e8fb619f3fda8274169231fe3fff2515b1333196f167"},
+]
+
+[package.dependencies]
+packaging = ">=23"
+tomlkit = ">=0.11.6"
+
+[package.extras]
+docs = ["furo (>=2022.12.7)", "sphinx (>=6.1.3)", "sphinx-argparse-cli (>=1.11)", "sphinx-autodoc-typehints (>=1.22,!=1.23.4)", "sphinx-copybutton (>=0.5.1)"]
+test = ["covdefaults (>=2.2.2)", "pytest (>=7.2.1)", "pytest-cov (>=4)", "pytest-mock (>=3.10)"]
+
+[[package]]
 name = "pytest"
 version = "7.2.1"
 description = "pytest: simple powerful testing with Python"
@@ -1278,6 +1298,18 @@ files = [
 ]
 
 [[package]]
+name = "tomlkit"
+version = "0.11.6"
+description = "Style preserving TOML library"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "tomlkit-0.11.6-py3-none-any.whl", hash = "sha256:07de26b0d8cfc18f871aec595fda24d95b08fef89d147caa861939f37230bf4b"},
+    {file = "tomlkit-0.11.6.tar.gz", hash = "sha256:71b952e5721688937fb02cf9d354dbcf0785066149d2855e44531ebdd2b65d73"},
+]
+
+[[package]]
 name = "typing-extensions"
 version = "4.5.0"
 description = "Backported and Experimental Type Hints for Python 3.7+"
@@ -1344,4 +1376,4 @@ testing = ["flake8 (<5)", "func-timeout", "jaraco.functools", "jaraco.itertools"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "87c213ed90b7e0c511aac983271ac2d647973f3f2318367a7599ecf25c7b0daa"
+content-hash = "2102afcd916eda7bbd618058393d5bdf7e736907e41823c02bbfdff786aa1414"
