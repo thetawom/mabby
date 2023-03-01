@@ -30,14 +30,6 @@ pyproject-fmt = "^0.9.1"
 [tool.isort]
 profile = "black"
 
-[tool.mypy]
-strict = true
-warn_return_any = false
-
-[[tool.mypy.overrides]]
-module = "matplotlib.*"
-ignore_missing_imports = true
-
 [tool.ruff]
 target-version = "py39"
 line-length = 88
