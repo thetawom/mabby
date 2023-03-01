@@ -1,6 +1,3 @@
-[tool.isort]
-profile = "black"
-
 [tool.poetry]
 name = "mabby"
 version = "0.1.0"
