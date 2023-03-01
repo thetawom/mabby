@@ -70,6 +70,10 @@ class TestSemiUniformStrategy(TestStrategy):
     def Qs(self, request):
         return request.param
 
+    @pytest.fixture(params=[[1, 1, 1]])
+    def Ns(self, request):
+        return request.param
+
     def test_prime_inits_Qs_and_Ns(self, prime_params, primed_strategy):
         assert isinstance(primed_strategy._Qs, np.ndarray)
         assert isinstance(primed_strategy._Ns, np.ndarray)
@@ -114,6 +118,10 @@ class TestSemiUniformStrategy(TestStrategy):
     def test_Qs_returns_Qs(self, primed_strategy, Qs):
         primed_strategy._Qs = Qs
         assert primed_strategy.Qs == Qs
+
+    def test_Ns_returns_Ns(self, primed_strategy, Ns):
+        primed_strategy._Ns = Ns
+        assert primed_strategy.Ns == Ns
 
 
 class TestRandomBandit(TestSemiUniformStrategy):

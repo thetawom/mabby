@@ -43,6 +43,12 @@ class Bandit:
             raise BanditUsageError("bandit has no Q values before it is run")
         return self.strategy.Qs
 
+    @property
+    def Ns(self) -> NDArray[np.int32]:
+        if not self._primed:
+            raise BanditUsageError("bandit has no Q values before it is run")
+        return self.strategy.Ns
+
 
 class RandomBandit(Bandit):
     def __init__(self, name: str | None = None):

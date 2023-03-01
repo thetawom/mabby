@@ -24,6 +24,10 @@ class GenericStrategy(Strategy):
     def Qs(self) -> NDArray[np.float64]:
         return np.zeros(self.k)
 
+    @property
+    def Ns(self) -> NDArray[np.int32]:
+        return np.zeros(self.k)
+
 
 class GenericArm(Arm):
     def __init__(self, **kwargs: float):
