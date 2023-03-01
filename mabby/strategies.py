@@ -28,17 +28,22 @@ class Strategy(ABC):
     def Qs(self) -> NDArray[np.float64]:
         """Compute action value estimates for each arm"""
 
+    @property
+    @abstractmethod
+    def Ns(self) -> NDArray[np.int32]:
+        """Count number of plays for each arm"""
+
 
 class SemiUniformStrategy(Strategy, ABC):
     _Qs: NDArray[np.float64]
-    _Ns: NDArray[np.float64]
+    _Ns: NDArray[np.int32]
 
     def __init__(self, **kwargs: float) -> None:
         super().__init__()
 
     def prime(self, k: int, steps: int) -> None:
-        self._Qs = np.zeros(k)
-        self._Ns = np.zeros(k)
+        self._Qs = np.zeros(k, dtype=np.float64)
+        self._Ns = np.zeros(k, dtype=np.int32)
 
     def choose(self, rng: Generator) -> int:
         if rng.random() < self.effective_eps():
@@ -58,6 +63,10 @@ class SemiUniformStrategy(Strategy, ABC):
     @property
     def Qs(self) -> NDArray[np.float64]:
         return self._Qs
+
+    @property
+    def Ns(self) -> NDArray[np.int32]:
+        return self._Ns
 
     @abstractmethod
     def effective_eps(self) -> float:
