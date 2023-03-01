@@ -14,12 +14,12 @@ class Arm(ABC):
 
     @abstractmethod
     def play(self, rng: Generator) -> float:
-        pass
+        """Play arm and sample reward from distribution"""
 
     @property
     @abstractmethod
     def mean(self) -> float:
-        pass
+        """Compute mean of reward distribution"""
 
     @classmethod
     def armset(cls, **kwargs: list[float]) -> ArmSet:
