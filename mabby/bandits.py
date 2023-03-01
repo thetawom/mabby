@@ -15,17 +15,10 @@ class Bandit:
         self._primed = False
         self._choice: int | None = None
 
-    @property
-    def name(self) -> str:
+    def __repr__(self) -> str:
         if self._name is None:
             return str(self.strategy)
         return self._name
-
-    def __str__(self) -> str:
-        return self.name
-
-    def __repr__(self) -> str:
-        return str(self.strategy)
 
     def prime(self, k: int, steps: int) -> None:
         self._primed = True
