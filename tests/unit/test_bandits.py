@@ -86,6 +86,9 @@ class TestBandit:
     def test_Qs_returns_strategy_Qs(self, primed_bandit):
         assert (primed_bandit.Qs == primed_bandit.strategy.Qs).all()
 
+    def test_Ns_returns_strategy_Ns(self, primed_bandit):
+        assert (primed_bandit.Ns == primed_bandit.strategy.Ns).all()
+
     def test_choose_before_prime_raises_error(self, mocker, bandit):
         mock_rng = mocker.Mock(spec=Generator)
         with pytest.raises(BanditUsageError):
@@ -94,6 +97,10 @@ class TestBandit:
     def test_Qs_before_prime_raises_error(self, bandit):
         with pytest.raises(BanditUsageError):
             assert bandit.Qs is not None
+
+    def test_Ns_before_prime_raises_error(self, bandit):
+        with pytest.raises(BanditUsageError):
+            assert bandit.Ns is not None
 
     def test_update_before_choose_raises_error(self, primed_bandit, reward):
         with pytest.raises(BanditUsageError):
