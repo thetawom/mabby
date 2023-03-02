@@ -1,9 +1,9 @@
 import pytest
 from numpy.random import Generator
 
-from mabby.bandits import Bandit, EpsilonGreedyBandit, RandomBandit
+from mabby.bandits import Bandit, EpsilonGreedyBandit, RandomBandit, UCB1Bandit
 from mabby.exceptions import BanditUsageError
-from mabby.strategies import EpsilonGreedyStrategy, RandomStrategy
+from mabby.strategies import EpsilonGreedyStrategy, RandomStrategy, UCB1Strategy
 
 
 class TestBandit:
@@ -127,3 +127,14 @@ class TestEpsilonGreedyBandit(TestBandit):
 
     def test_init_sets_epsilon_greedy_strategy(self, bandit):
         assert isinstance(bandit.strategy, EpsilonGreedyStrategy)
+
+
+class TestUCB1Bandit(TestBandit):
+    BANDIT_CLASS = UCB1Bandit
+
+    @pytest.fixture(params=[{"alpha": 2}, {"alpha": 0.5, "name": "bandit-name"}])
+    def valid_params(self, request):
+        return request.param
+
+    def test_init_sets_ucb1_strategy(self, bandit):
+        assert isinstance(bandit.strategy, UCB1Strategy)

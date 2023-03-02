@@ -1,11 +1,13 @@
 import numpy as np
 import pytest
 
+from mabby.exceptions import BanditUsageError
 from mabby.strategies import (
     EpsilonGreedyStrategy,
     RandomStrategy,
     SemiUniformStrategy,
     Strategy,
+    UCB1Strategy,
 )
 
 
@@ -98,6 +100,10 @@ class TestSemiUniformStrategy(TestStrategy):
         primed_strategy.choose(mock_rng)
         exploit.assert_called_once_with()
 
+    def test_choose_without_rng_raises_error(self, primed_strategy):
+        with pytest.raises(BanditUsageError):
+            primed_strategy.choose()
+
     def test_explore_follows_uniform_distribution(self):
         pass
 
@@ -149,8 +155,94 @@ class TestEpsilonGreedyBandit(TestSemiUniformStrategy):
     def invalid_params(self, request):
         return request.param
 
+    def test_init_sets_eps(self, valid_params, strategy):
+        assert strategy.eps == valid_params["eps"]
+
     def test_repr_includes_eps(self, valid_params, strategy):
         assert str(valid_params["eps"]) in repr(strategy)
 
     def test_effective_eps_equals_eps(self, valid_params, strategy):
         assert strategy.effective_eps() == valid_params["eps"]
+
+
+class TestUCB1Bandit(TestStrategy):
+    STRATEGY_CLASS = UCB1Strategy
+
+    @pytest.fixture(params=[{"alpha": 0.3}])
+    def valid_params(self, request):
+        return request.param
+
+    @pytest.fixture(params=[{"alpha": -2}])
+    def invalid_params(self, request):
+        return request.param
+
+    @pytest.fixture(params=[([0.1, 0.5, 0.2], [1, 1, 1]), ([2, 5], [10, 3])])
+    def Qs_Ns(self, request):
+        return request.param
+
+    def test_init_sets_alpha(self, valid_params, strategy):
+        assert strategy.alpha == valid_params["alpha"]
+
+    def test_repr_includes_alpha(self, valid_params, strategy):
+        assert str(valid_params["alpha"]) in repr(strategy)
+
+    def test_prime_inits_t(self, primed_strategy):
+        assert primed_strategy._t == 0
+
+    def test_prime_inits_Qs_and_Ns(self, prime_params, primed_strategy):
+        assert isinstance(primed_strategy._Qs, np.ndarray)
+        assert isinstance(primed_strategy._Ns, np.ndarray)
+        assert len(primed_strategy._Qs) == prime_params["k"]
+        assert len(primed_strategy._Ns) == prime_params["k"]
+        assert not primed_strategy._Qs.any()
+        assert not primed_strategy._Ns.any()
+
+    @pytest.mark.parametrize("UCBs", [[0.1, 0.5, 0.3]])
+    def test_choose_returns_UCB_argmax_when_t_greater_than_k(
+        self, mocker, prime_params, primed_strategy, UCBs
+    ):
+        mocker.patch.object(primed_strategy, "_compute_UCBs", return_value=UCBs)
+        compute_UCBs = mocker.spy(primed_strategy, "_compute_UCBs")
+        primed_strategy._t = prime_params["k"]
+        choice = primed_strategy.choose()
+        compute_UCBs.assert_called_once()
+        assert UCBs[choice] == max(UCBs)
+
+    def test_choose_returns_t_when_t_less_than_k(
+        self, prime_params, primed_strategy, reward
+    ):
+        for t in range(prime_params["k"]):
+            choice = primed_strategy.choose()
+            primed_strategy.update(choice, reward)
+            assert choice == t
+
+    def test_compute_UCBs_computes_correct_values(
+        self, valid_params, primed_strategy, Qs_Ns
+    ):
+        primed_strategy._Qs = Qs_Ns[0]
+        primed_strategy._Ns = Qs_Ns[1]
+        primed_strategy._t = np.sum(Qs_Ns[1])
+        UCBs = primed_strategy._compute_UCBs()
+        expected_UCBs = Qs_Ns[0] + valid_params["alpha"] * np.sqrt(
+            np.log(primed_strategy._t) / Qs_Ns[1]
+        )
+        assert np.allclose(UCBs, expected_UCBs, rtol=0.01)
+
+    def test_update_updates_Qs_and_Ns(
+        self, prime_params, primed_strategy, choice, reward
+    ):
+        primed_strategy._t = prime_params["k"]
+        primed_strategy._Ns = np.ones(prime_params["k"])
+        primed_strategy.update(choice, reward)
+        assert primed_strategy._Qs[choice] == reward / 2
+        assert primed_strategy._Ns[choice] == 2
+        assert sum(primed_strategy._Ns) == prime_params["k"] + 1
+        assert primed_strategy._t == prime_params["k"] + 1
+
+    def test_Qs_returns_Qs(self, primed_strategy, Qs_Ns):
+        primed_strategy._Qs = Qs_Ns[0]
+        assert primed_strategy.Qs == Qs_Ns[0]
+
+    def test_Ns_returns_Ns(self, primed_strategy, Qs_Ns):
+        primed_strategy._Ns = Qs_Ns[1]
+        assert primed_strategy.Ns == Qs_Ns[1]
