@@ -5,7 +5,12 @@ from numpy.random import Generator
 from numpy.typing import NDArray
 
 from mabby.exceptions import BanditUsageError
-from mabby.strategies import EpsilonGreedyStrategy, RandomStrategy, Strategy
+from mabby.strategies import (
+    EpsilonGreedyStrategy,
+    RandomStrategy,
+    Strategy,
+    UCB1Strategy,
+)
 
 
 class Bandit:
@@ -59,4 +64,10 @@ class RandomBandit(Bandit):
 class EpsilonGreedyBandit(Bandit):
     def __init__(self, eps: float, name: str | None = None):
         strategy = EpsilonGreedyStrategy(eps=eps)
+        super().__init__(strategy=strategy, name=name)
+
+
+class UCB1Bandit(Bandit):
+    def __init__(self, alpha: float, name: str | None = None):
+        strategy = UCB1Strategy(alpha=alpha)
         super().__init__(strategy=strategy, name=name)
