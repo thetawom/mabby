@@ -45,6 +45,10 @@ fix: format
 pre-commit: $(INSTALL_STAMP) ## run all pre-commit hooks
 	$(POETRY) run pre-commit run --all-files
 
+.PHONY: type-check
+type-check: $(INSTALL_STAMP) ## run static type-checking
+	$(POETRY) run mypy $(NAME) --ignore-missing-imports
+
 ##@ Testing
 .PHONY: test
 test: $(INSTALL_STAMP) ## run all tests
