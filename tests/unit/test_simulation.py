@@ -61,7 +61,7 @@ class TestSimulation:
         mocker.patch.object(
             simulation,
             "_run_trials_for_bandit",
-            lambda b, _, steps: BanditStats(b, armset, steps),
+            lambda b, _, steps, metrics: BanditStats(b, armset, steps, metrics),
         )
         run_trials_for_bandit_spy = mocker.spy(simulation, "_run_trials_for_bandit")
         sim_stats = simulation.run(**run_params)
