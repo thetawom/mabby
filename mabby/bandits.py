@@ -63,6 +63,7 @@ class RandomBandit(Bandit):
 
 class EpsilonGreedyBandit(Bandit):
     def __init__(self, eps: float, name: str | None = None):
+        self.eps = eps
         strategy = EpsilonGreedyStrategy(eps=eps)
         super().__init__(strategy=strategy, name=name)
 

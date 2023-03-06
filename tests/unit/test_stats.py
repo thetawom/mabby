@@ -1,10 +1,12 @@
 import random
 from unittest.mock import patch
 
+import numpy as np
 import pytest
 
-from mabby import ArmSet
-from mabby.stats import BanditStats, Metric
+from mabby import ArmSet, Simulation
+from mabby.exceptions import StatsUsageError
+from mabby.stats import BanditStats, Metric, SimulationStats
 
 BASE_METRICS = [Metric.REGRET, Metric.REWARDS, Metric.OPTIMALITY]
 NON_BASE_METRICS = [Metric.CUM_REGRET, Metric.CUM_REWARDS]
@@ -214,3 +216,124 @@ class TestBanditStats:
         prev_rewards = bandit_stats._stats[Metric.REWARDS][step]
         bandit_stats.update(step=step, choice=choice, reward=reward)
         assert bandit_stats._stats[Metric.REWARDS][step] == prev_rewards + reward
+
+
+class TestSimulationStats:
+    @pytest.fixture(autouse=True)
+    def patch_matplotlib_pyplot_show(self, mocker):
+        mocker.patch("matplotlib.pyplot.show")
+
+    @pytest.fixture(params=[3])
+    def bandits(self, request, bandit_factory):
+        return [bandit_factory.generic() for _ in range(request.param)]
+
+    @pytest.fixture
+    def bandit(self, bandits):
+        return random.choice(bandits)
+
+    @pytest.fixture(params=[3])
+    def armset(self, request, arm_factory):
+        arms = [arm_factory.generic(mean=random.random()) for _ in range(request.param)]
+        return ArmSet(arms=arms)
+
+    @pytest.fixture
+    def simulation(self, bandits, armset):
+        return Simulation(bandits=bandits, armset=armset)
+
+    @pytest.fixture(params=[10])
+    def steps(self, request):
+        return request.param
+
+    @pytest.fixture
+    def bandit_stats(self, bandit, armset, steps):
+        return BanditStats(bandit=bandit, armset=armset, steps=steps)
+
+    @pytest.fixture
+    def sim_stats(self, simulation):
+        return SimulationStats(simulation=simulation)
+
+    @pytest.fixture
+    def filled_sim_stats(self, sim_stats, bandits, armset, steps):
+        for bandit in bandits:
+            sim_stats.add(BanditStats(bandit, armset, steps))
+        return sim_stats
+
+    @pytest.fixture
+    def plot_spy(self, mocker, filled_sim_stats):
+        return mocker.spy(filled_sim_stats, "plot")
+
+    def test_init_sets_simulation_and_stats_dict(self, sim_stats, simulation):
+        assert sim_stats._simulation == simulation
+        assert isinstance(sim_stats._stats_dict, dict)
+
+    def test_add_puts_bandit_stats_in_stats_dict(self, sim_stats, bandit, bandit_stats):
+        sim_stats.add(bandit_stats)
+        assert sim_stats._stats_dict[bandit] == bandit_stats
+
+    def test_getitem_returns_bandit_stats_of_bandit(
+        self, sim_stats, bandit, bandit_stats
+    ):
+        sim_stats._stats_dict[bandit] = bandit_stats
+        assert sim_stats[bandit] == bandit_stats
+
+    def test_setitem_puts_bandit_stats_in_stats_dict(
+        self, sim_stats, bandit, bandit_stats
+    ):
+        sim_stats[bandit] = bandit_stats
+        assert sim_stats._stats_dict[bandit] == bandit_stats
+
+    def test_setitem_raises_error_with_non_matching_bandit(
+        self, sim_stats, bandit, bandits, bandit_stats
+    ):
+        other_bandit = random.choice(list(filter(lambda b: b != bandit, bandits)))
+        with pytest.raises(StatsUsageError):
+            sim_stats[other_bandit] = bandit_stats
+
+    def test_contains_returns_true_if_bandit_tracked(self, filled_sim_stats, bandits):
+        for bandit in bandits:
+            assert bandit in filled_sim_stats
+
+    def test_contains_returns_false_if_bandit_not_tracked(
+        self, sim_stats, bandit_factory
+    ):
+        other_bandit = bandit_factory.generic()
+        assert other_bandit not in sim_stats
+
+    @patch("matplotlib.pyplot.plot")
+    def test_plot_plots_stats_for_each_bandit(
+        self, plot, filled_sim_stats, metric, bandits
+    ):
+        filled_sim_stats.plot(metric=metric)
+        calls = plot.call_args_list
+        for i, bandit in enumerate(bandits):
+            bandit_stats = filled_sim_stats[bandit]
+            np.testing.assert_array_equal(bandit_stats[metric], calls[i][0][0])
+            assert calls[i][1]["label"] == str(bandit)
+
+    def test_plot_regret_invokes_plot_when_cumulative_is_true(
+        self, plot_spy, filled_sim_stats
+    ):
+        filled_sim_stats.plot_regret()
+        plot_spy.assert_called_once_with(Metric.CUM_REGRET)
+
+    def test_plot_regret_invokes_plot_when_cumulative_is_false(
+        self, plot_spy, filled_sim_stats
+    ):
+        filled_sim_stats.plot_regret(cumulative=False)
+        plot_spy.assert_called_once_with(Metric.REGRET)
+
+    def test_plot_optimality_invokes_plot(self, plot_spy, filled_sim_stats):
+        filled_sim_stats.plot_optimality()
+        plot_spy.assert_called_once_with(Metric.OPTIMALITY)
+
+    def test_plot_rewards_invokes_plot_when_cumulative_is_true(
+        self, plot_spy, filled_sim_stats
+    ):
+        filled_sim_stats.plot_rewards()
+        plot_spy.assert_called_once_with(Metric.CUM_REWARDS)
+
+    def test_plot_rewards_invokes_plot_when_cumulative_is_false(
+        self, plot_spy, filled_sim_stats
+    ):
+        filled_sim_stats.plot_rewards(cumulative=False)
+        plot_spy.assert_called_once_with(Metric.REWARDS)
