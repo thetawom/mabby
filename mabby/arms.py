@@ -51,6 +51,9 @@ class ArmSet:
     def best_arm(self) -> int:
         return int(np.argmax([arm.mean for arm in self._arms]))
 
+    def regret(self, choice: int) -> float:
+        return self._arms[self.best_arm()].mean - self._arms[choice].mean
+
 
 class BernoulliArm(Arm):
     def __init__(self, p: float):
