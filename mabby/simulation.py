@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 import numpy as np
 
 from mabby.bandits import Bandit
-from mabby.stats import BanditStats, SimulationStats
+from mabby.stats import BanditStats, Metric, SimulationStats
 
 if TYPE_CHECKING:
     from mabby.arms import ArmSet
@@ -22,17 +22,23 @@ class Simulation:
         self.armset = armset
         self._rng = np.random.default_rng(seed)
 
-    def run(self, trials: int, steps: int) -> SimulationStats:
+    def run(
+        self, trials: int, steps: int, metrics: Iterable[Metric] | None = None
+    ) -> SimulationStats:
         sim_stats = SimulationStats(simulation=self)
         for bandit in self.bandits:
-            bandit_stats = self._run_trials_for_bandit(bandit, trials, steps)
+            bandit_stats = self._run_trials_for_bandit(bandit, trials, steps, metrics)
             sim_stats.add(bandit_stats)
         return sim_stats
 
     def _run_trials_for_bandit(
-        self, bandit: Bandit, trials: int, steps: int
+        self,
+        bandit: Bandit,
+        trials: int,
+        steps: int,
+        metrics: Iterable[Metric] | None = None,
     ) -> BanditStats:
-        bandit_stats = BanditStats(bandit, self.armset, steps)
+        bandit_stats = BanditStats(bandit, self.armset, steps, metrics)
         for _ in range(trials):
             bandit.prime(len(self.armset), steps)
             for step in range(steps):

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from collections.abc import Collection, Iterable
+from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Callable
@@ -107,7 +107,7 @@ class BanditStats:
         bandit: Bandit,
         armset: ArmSet,
         steps: int,
-        metrics: Collection[Metric] | None = None,
+        metrics: Iterable[Metric] | None = None,
     ):
         self.bandit = bandit
         self._armset = armset
