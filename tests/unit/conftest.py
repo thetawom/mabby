@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import numpy as np
 import pytest
 from numpy.random import Generator
@@ -14,7 +16,7 @@ class GenericStrategy(Strategy):
     def prime(self, k: int, steps: int) -> None:
         self.k = k
 
-    def choose(self, rng: Generator) -> int:
+    def choose(self, rng: Generator | None = None) -> int:
         return 0
 
     def update(self, choice: int, reward: float) -> None:
@@ -30,15 +32,15 @@ class GenericStrategy(Strategy):
 
 
 class GenericArm(Arm):
-    def __init__(self, **kwargs: float):
-        pass
+    def __init__(self, mean: float = 0):
+        self._mean = mean
 
     def play(self, rng: Generator) -> float:
         return 1
 
     @property
     def mean(self) -> float:
-        return 0
+        return self._mean
 
 
 @pytest.fixture
@@ -57,7 +59,7 @@ def bandit_factory(strategy_factory):
         @staticmethod
         def generic():
             strategy = strategy_factory.generic()
-            return Bandit(strategy=strategy)
+            return Bandit(strategy=strategy, name="Generic Bandit")
 
     return GenericBanditFactory
 
@@ -66,7 +68,7 @@ def bandit_factory(strategy_factory):
 def arm_factory():
     class GenericArmFactory:
         @staticmethod
-        def generic():
-            return GenericArm()
+        def generic(mean: float = 0):
+            return GenericArm(mean=mean)
 
     return GenericArmFactory
