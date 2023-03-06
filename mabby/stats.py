@@ -6,10 +6,13 @@ from enum import Enum
 from typing import TYPE_CHECKING, Callable
 
 import numpy as np
+from matplotlib import pyplot as plt
 from numpy.typing import NDArray
 
+from mabby.exceptions import StatsUsageError
+
 if TYPE_CHECKING:
-    from mabby import ArmSet, Bandit
+    from mabby import ArmSet, Bandit, Simulation
 
 
 @dataclass
@@ -63,6 +66,41 @@ class Metric(Enum):
         return values
 
 
+class SimulationStats:
+    def __init__(self, simulation: Simulation):
+        self._simulation: Simulation = simulation
+        self._stats_dict: dict[Bandit, BanditStats] = {}
+
+    def add(self, bandit_stats: BanditStats) -> None:
+        self._stats_dict[bandit_stats.bandit] = bandit_stats
+
+    def __getitem__(self, bandit: Bandit) -> BanditStats:
+        return self._stats_dict[bandit]
+
+    def __setitem__(self, bandit: Bandit, bandit_stats: BanditStats) -> None:
+        if bandit != bandit_stats.bandit:
+            raise StatsUsageError("bandits specified in key and value don't match")
+        self._stats_dict[bandit] = bandit_stats
+
+    def __contains__(self, bandit: Bandit) -> bool:
+        return bandit in self._stats_dict
+
+    def plot(self, metric: Metric) -> None:
+        for bandit, bandit_stats in self._stats_dict.items():
+            plt.plot(bandit_stats[metric], label=str(bandit))
+        plt.legend()
+        plt.show()
+
+    def plot_regret(self, cumulative: bool = True) -> None:
+        self.plot(metric=Metric.CUM_REGRET if cumulative else Metric.REGRET)
+
+    def plot_optimality(self) -> None:
+        self.plot(metric=Metric.OPTIMALITY)
+
+    def plot_rewards(self, cumulative: bool = True) -> None:
+        self.plot(metric=Metric.CUM_REWARDS if cumulative else Metric.REWARDS)
+
+
 class BanditStats:
     def __init__(
         self,
@@ -83,7 +121,8 @@ class BanditStats:
         return self._steps
 
     def __getitem__(self, metric: Metric) -> NDArray[np.float64]:
-        values = self._stats[metric.base] / self._counts
+        with np.errstate(divide="ignore", invalid="ignore"):
+            values = self._stats[metric.base] / self._counts
         return metric.transform(values)
 
     def update(self, step: int, choice: int, reward: float) -> None:
