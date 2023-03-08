@@ -5,12 +5,12 @@ from mabby.agents import (
     RandomAgent,
     UCB1Agent,
 )
-from mabby.arms import ArmSet, BernoulliArm, GaussianArm
+from mabby.bandit import Bandit, BernoulliArm, GaussianArm
 from mabby.simulation import Simulation
 from mabby.stats import Metric
 
 __all__ = [
-    "ArmSet",
+    "Bandit",
     "BernoulliArm",
     "GaussianArm",
     "Agent",

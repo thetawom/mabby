@@ -12,7 +12,7 @@ from numpy.typing import NDArray
 from mabby.exceptions import StatsUsageError
 
 if TYPE_CHECKING:
-    from mabby import Agent, ArmSet, Simulation
+    from mabby import Agent, Bandit, Simulation
 
 
 @dataclass
@@ -105,12 +105,12 @@ class AgentStats:
     def __init__(
         self,
         agent: Agent,
-        armset: ArmSet,
+        bandit: Bandit,
         steps: int,
         metrics: Iterable[Metric] | None = None,
     ):
         self.agent = agent
-        self._armset = armset
+        self._bandit = bandit
         self._steps = steps
         self._counts = np.zeros(steps)
 
@@ -126,8 +126,8 @@ class AgentStats:
         return metric.transform(values)
 
     def update(self, step: int, choice: int, reward: float) -> None:
-        opt_choice = self._armset.best_arm()
-        regret = self._armset.regret(choice)
+        opt_choice = self._bandit.best_arm()
+        regret = self._bandit.regret(choice)
         if Metric.REGRET in self._stats:
             self._stats[Metric.REGRET][step] += regret
         if Metric.OPTIMALITY in self._stats:
