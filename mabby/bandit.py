@@ -6,6 +6,8 @@ from collections.abc import Iterable
 import numpy as np
 from numpy.random import Generator
 
+from mabby.utils import random_argmax
+
 
 class Arm(ABC):
     @abstractmethod
@@ -30,8 +32,11 @@ class Arm(ABC):
 
 
 class Bandit:
-    def __init__(self, arms: list[Arm]):
+    def __init__(
+        self, arms: list[Arm], rng: Generator | None = None, seed: int | None = None
+    ):
         self._arms = arms
+        self._rng = rng if rng else np.random.default_rng(seed)
 
     def __len__(self) -> int:
         return len(self._arms)
@@ -48,11 +53,18 @@ class Bandit:
     def play(self, i: int, rng: Generator) -> float:
         return self[i].play(rng)
 
+    @property
+    def means(self) -> list[float]:
+        return [arm.mean for arm in self._arms]
+
     def best_arm(self) -> int:
-        return int(np.argmax([arm.mean for arm in self._arms]))
+        return random_argmax(self.means, rng=self._rng)
+
+    def is_opt(self, choice: int) -> bool:
+        return np.max(self.means) == self._arms[choice].mean
 
     def regret(self, choice: int) -> float:
-        return self._arms[self.best_arm()].mean - self._arms[choice].mean
+        return np.max(self.means) - self._arms[choice].mean
 
 
 class BernoulliArm(Arm):

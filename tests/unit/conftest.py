@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import random
+
 import numpy as np
 import pytest
 from numpy.random import Generator
@@ -68,7 +70,9 @@ def agent_factory(strategy_factory):
 def arm_factory():
     class GenericArmFactory:
         @staticmethod
-        def generic(mean: float = 0):
+        def generic(mean: float | None = None):
+            if mean is None:
+                mean = random.random()
             return GenericArm(mean=mean)
 
     return GenericArmFactory
