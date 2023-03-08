@@ -101,11 +101,11 @@ class TestAgentStats:
 
     @pytest.fixture
     def opt_choice(self, bandit):
-        return bandit.best_arm()
+        return int(np.argmax(bandit.means))
 
     @pytest.fixture
-    def non_opt_choice(self, opt_choice):
-        return 1 if opt_choice == 0 else opt_choice - 1
+    def non_opt_choice(self, bandit):
+        return int(np.argmin(bandit.means))
 
     @pytest.fixture(params=[1])
     def reward(self, request):

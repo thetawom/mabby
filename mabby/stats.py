@@ -126,12 +126,11 @@ class AgentStats:
         return metric.transform(values)
 
     def update(self, step: int, choice: int, reward: float) -> None:
-        opt_choice = self._bandit.best_arm()
         regret = self._bandit.regret(choice)
         if Metric.REGRET in self._stats:
             self._stats[Metric.REGRET][step] += regret
         if Metric.OPTIMALITY in self._stats:
-            self._stats[Metric.OPTIMALITY][step] += int(opt_choice == choice)
+            self._stats[Metric.OPTIMALITY][step] += int(self._bandit.is_opt(choice))
         if Metric.REWARDS in self._stats:
             self._stats[Metric.REWARDS][step] += reward
         self._counts[step] += 1

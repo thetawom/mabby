@@ -108,44 +108,66 @@ class TestGaussianArm(TestArm):
 
 
 class TestBandit:
-    @pytest.fixture(params=[[1, 3], [0.2, 0.7, 0.3]])
-    def mock_arms(self, mocker, request):
-        return [mocker.Mock(mean=m) for m in request.param]
+    @pytest.fixture(params=[2, 4])
+    def num_arms(self, request):
+        return request.param
+
+    @pytest.fixture
+    def arms(self, num_arms, arm_factory):
+        return [arm_factory.generic() for _ in range(num_arms)]
 
     @pytest.fixture()
-    def mock_bandit(self, mock_arms):
-        return Bandit(arms=mock_arms)
+    def bandit(self, arms):
+        return Bandit(arms=arms)
 
-    def test_init_sets_arms_list(self, mock_arms, mock_bandit):
-        arms_list = mock_bandit._arms
-        assert arms_list == mock_arms
+    def test_init_sets_arms_list(self, arms, bandit):
+        arms_list = bandit._arms
+        assert arms_list == arms
 
-    def test_len_returns_num_arms(self, mock_arms, mock_bandit):
-        num_arms = len(mock_bandit)
-        assert num_arms == len(mock_arms)
+    def test_init_sets_bandit(self, bandit):
+        assert bandit._rng is not None
 
-    def test_repr_returns_arm_list_repr(self, mock_arms, mock_bandit):
-        bandit_repr = repr(mock_bandit)
-        assert bandit_repr == repr(mock_arms)
+    def test_len_returns_num_arms(self, arms, bandit):
+        num_arms = len(bandit)
+        assert num_arms == len(arms)
 
-    def test_getitem_returns_correct_arm(self, mock_arms, mock_bandit):
-        for i, arm in enumerate(mock_bandit):
-            assert arm == mock_arms[i]
+    def test_repr_returns_arm_list_repr(self, arms, bandit):
+        bandit_repr = repr(bandit)
+        assert bandit_repr == repr(arms)
+
+    def test_getitem_returns_correct_arm(self, arms, bandit):
+        for i, arm in enumerate(bandit):
+            assert arm == arms[i]
 
     @pytest.mark.parametrize("choice", [0, 1])
     def test_play_invokes_play_of_correct_arm(
-        self, mock_arms, mock_bandit, mock_rng, choice
+        self, mocker, arms, bandit, mock_rng, choice
     ):
-        mock_bandit.play(choice, mock_rng)
-        mock_arms[choice].play.assert_called_once_with(mock_rng)
-        for i in filter(lambda x: x != choice, range(len(mock_arms))):
-            mock_arms[i].play.assert_not_called()
+        play_spy = mocker.spy(arms[choice], "play")
+        bandit.play(choice, mock_rng)
+        play_spy.assert_called_once_with(mock_rng)
 
-    def test_best_arm_returns_arm_with_max_mean(self, mock_arms, mock_bandit):
-        best_arm = mock_bandit.best_arm()
-        assert mock_arms[best_arm].mean == max(arm.mean for arm in mock_arms)
+    def test_best_arm_returns_arm_with_max_mean(self, arms, bandit):
+        best_arm = bandit.best_arm()
+        assert arms[best_arm].mean == max(arm.mean for arm in arms)
+
+    def test_best_arm_returns_any_optimal_arm_if_many(self, arm_factory, num_arms):
+        arms = [arm_factory.generic(mean=1) for _ in range(num_arms)]
+        bandit = Bandit(arms=arms, seed=324)
+        best_arm_samples = [bandit.best_arm() for _ in range(1000)]
+        values, counts = np.unique(best_arm_samples, return_counts=True)
+        assert len(values) == num_arms
+        assert np.allclose(counts, np.mean(counts), rtol=0.1)
+
+    def test_is_opt_returns_true_for_optimal_choice(self, arms, bandit):
+        opt_choice = int(np.argmax(bandit.means))
+        assert bandit.is_opt(opt_choice)
+
+    def test_is_opt_returns_false_for_non_optimal_choice(self, arms, bandit):
+        non_opt_choice = int(np.argmin(bandit.means))
+        assert not bandit.is_opt(non_opt_choice)
 
     @pytest.mark.parametrize("choice", [0, 1])
-    def test_regret_returns_difference_in_mean(self, mock_arms, mock_bandit, choice):
-        regret = mock_bandit.regret(choice)
-        assert regret == max(arm.mean for arm in mock_arms) - mock_arms[choice].mean
+    def test_regret_returns_difference_in_mean(self, arms, bandit, choice):
+        regret = bandit.regret(choice)
+        assert regret == max(arm.mean for arm in arms) - arms[choice].mean
