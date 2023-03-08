@@ -1,17 +1,15 @@
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import numpy as np
 from numpy.random import Generator
 from numpy.typing import NDArray
 
 from mabby.exceptions import AgentUsageError
-from mabby.strategies import (
-    BetaTSStrategy,
-    EpsilonGreedyStrategy,
-    RandomStrategy,
-    Strategy,
-    UCB1Strategy,
-)
+
+if TYPE_CHECKING:
+    from mabby.strategies import Strategy
 
 
 class Agent:
@@ -57,29 +55,3 @@ class Agent:
         if not self._primed:
             raise AgentUsageError("agent has no Q values before it is run")
         return self.strategy.Ns
-
-
-class RandomAgent(Agent):
-    def __init__(self, name: str | None = None):
-        strategy = RandomStrategy()
-        super().__init__(strategy=strategy, name=name)
-
-
-class EpsilonGreedyAgent(Agent):
-    def __init__(self, eps: float, name: str | None = None):
-        self.eps = eps
-        strategy = EpsilonGreedyStrategy(eps=eps)
-        super().__init__(strategy=strategy, name=name)
-
-
-class UCB1Agent(Agent):
-    def __init__(self, alpha: float, name: str | None = None):
-        self.alpha = alpha
-        strategy = UCB1Strategy(alpha=alpha)
-        super().__init__(strategy=strategy, name=name)
-
-
-class BetaTSAgent(Agent):
-    def __init__(self, general: bool = False, name: str | None = None):
-        strategy = BetaTSStrategy(general=general)
-        super().__init__(strategy=strategy, name=name)

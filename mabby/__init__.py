@@ -1,23 +1,27 @@
 from mabby.agents import (
     Agent,
-    BetaTSAgent,
-    EpsilonGreedyAgent,
-    RandomAgent,
-    UCB1Agent,
 )
 from mabby.bandit import Bandit, BernoulliArm, GaussianArm
 from mabby.simulation import Simulation
 from mabby.stats import Metric
+from mabby.strategies import (
+    BetaTSStrategy,
+    EpsilonGreedyStrategy,
+    RandomStrategy,
+    Strategy,
+    UCB1Strategy,
+)
 
 __all__ = [
+    "Agent",
     "Bandit",
     "BernoulliArm",
     "GaussianArm",
-    "Agent",
-    "RandomAgent",
-    "EpsilonGreedyAgent",
-    "UCB1Agent",
-    "BetaTSAgent",
     "Simulation",
     "Metric",
+    "BetaTSStrategy",
+    "EpsilonGreedyStrategy",
+    "RandomStrategy",
+    "Strategy",
+    "UCB1Strategy",
 ]
