@@ -3,9 +3,9 @@ import pytest
 
 from mabby import (
     BernoulliArm,
-    EpsilonGreedyAgent,
+    EpsilonGreedyStrategy,
     GaussianArm,
-    RandomAgent,
+    RandomStrategy,
     Simulation,
 )
 
@@ -14,7 +14,7 @@ from mabby import (
 @pytest.mark.parametrize("num_agents", [2])
 def test_random_bernoulli_agents_simulation(p, num_agents):
     bandit = BernoulliArm.bandit(p=p)
-    agents = [RandomAgent() for _ in range(num_agents)]
+    agents = [RandomStrategy().agent() for _ in range(num_agents)]
     sim = Simulation(agents=agents, bandit=bandit, seed=15)
     sim.run(trials=100, steps=1000)
     for agent in agents:
@@ -26,7 +26,7 @@ def test_random_bernoulli_agents_simulation(p, num_agents):
 @pytest.mark.parametrize("num_agents", [2])
 def test_random_gaussian_agents_simulation(loc, scale, num_agents):
     bandit = GaussianArm.bandit(loc=loc, scale=scale)
-    agents = [RandomAgent() for _ in range(num_agents)]
+    agents = [RandomStrategy().agent() for _ in range(num_agents)]
     sim = Simulation(agents=agents, bandit=bandit, seed=63)
     sim.run(trials=100, steps=1000)
     for agent in agents:
@@ -38,7 +38,7 @@ def test_random_gaussian_agents_simulation(loc, scale, num_agents):
 @pytest.mark.parametrize("eps", [[0.1, 0.8]])
 def test_epsilon_greedy_bernoulli_agents_simulation(p, eps):
     bandit = BernoulliArm.bandit(p=p)
-    agents = [EpsilonGreedyAgent(eps=e) for e in eps]
+    agents = [EpsilonGreedyStrategy(eps=e).agent() for e in eps]
     sim = Simulation(agents=agents, bandit=bandit, seed=0)
     sim.run(trials=100, steps=1000)
     opt_arm = np.argmax(p)
@@ -51,7 +51,7 @@ def test_epsilon_greedy_bernoulli_agents_simulation(p, eps):
 @pytest.mark.parametrize("eps", [[0.1, 0.3]])
 def test_epsilon_greedy_gaussian_agents_simulation(loc, scale, eps):
     bandit = GaussianArm.bandit(loc=loc, scale=scale)
-    agents = [EpsilonGreedyAgent(eps=e) for e in eps]
+    agents = [EpsilonGreedyStrategy(eps=e).agent() for e in eps]
     sim = Simulation(agents=agents, bandit=bandit, seed=3028)
     sim.run(trials=100, steps=1000)
     opt_arm = np.argmax(loc)
