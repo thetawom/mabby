@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from mabby.bandits import Bandit
-from mabby.stats import BanditStats, Metric, SimulationStats
+from mabby.agents import Agent
+from mabby.stats import AgentStats, Metric, SimulationStats
 
 if TYPE_CHECKING:
     from mabby.arms import ArmSet
@@ -14,9 +14,9 @@ if TYPE_CHECKING:
 
 class Simulation:
     def __init__(
-        self, bandits: Iterable[Bandit], armset: ArmSet, seed: int | None = None
+        self, agents: Iterable[Agent], armset: ArmSet, seed: int | None = None
     ):
-        self.bandits = bandits
+        self.agents = agents
         if len(armset) == 0:
             raise ValueError("ArmSet cannot be empty")
         self.armset = armset
@@ -26,24 +26,24 @@ class Simulation:
         self, trials: int, steps: int, metrics: Iterable[Metric] | None = None
     ) -> SimulationStats:
         sim_stats = SimulationStats(simulation=self)
-        for bandit in self.bandits:
-            bandit_stats = self._run_trials_for_bandit(bandit, trials, steps, metrics)
-            sim_stats.add(bandit_stats)
+        for agent in self.agents:
+            agent_stats = self._run_trials_for_agent(agent, trials, steps, metrics)
+            sim_stats.add(agent_stats)
         return sim_stats
 
-    def _run_trials_for_bandit(
+    def _run_trials_for_agent(
         self,
-        bandit: Bandit,
+        agent: Agent,
         trials: int,
         steps: int,
         metrics: Iterable[Metric] | None = None,
-    ) -> BanditStats:
-        bandit_stats = BanditStats(bandit, self.armset, steps, metrics)
+    ) -> AgentStats:
+        agent_stats = AgentStats(agent, self.armset, steps, metrics)
         for _ in range(trials):
-            bandit.prime(len(self.armset), steps, self._rng)
+            agent.prime(len(self.armset), steps, self._rng)
             for step in range(steps):
-                choice = bandit.choose()
+                choice = agent.choose()
                 reward = self.armset.play(choice, self._rng)
-                bandit.update(reward)
-                bandit_stats.update(step, choice, reward)
-        return bandit_stats
+                agent.update(reward)
+                agent_stats.update(step, choice, reward)
+        return agent_stats

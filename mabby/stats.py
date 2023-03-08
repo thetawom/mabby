@@ -12,7 +12,7 @@ from numpy.typing import NDArray
 from mabby.exceptions import StatsUsageError
 
 if TYPE_CHECKING:
-    from mabby import ArmSet, Bandit, Simulation
+    from mabby import Agent, ArmSet, Simulation
 
 
 @dataclass
@@ -69,25 +69,25 @@ class Metric(Enum):
 class SimulationStats:
     def __init__(self, simulation: Simulation):
         self._simulation: Simulation = simulation
-        self._stats_dict: dict[Bandit, BanditStats] = {}
+        self._stats_dict: dict[Agent, AgentStats] = {}
 
-    def add(self, bandit_stats: BanditStats) -> None:
-        self._stats_dict[bandit_stats.bandit] = bandit_stats
+    def add(self, agent_stats: AgentStats) -> None:
+        self._stats_dict[agent_stats.agent] = agent_stats
 
-    def __getitem__(self, bandit: Bandit) -> BanditStats:
-        return self._stats_dict[bandit]
+    def __getitem__(self, agent: Agent) -> AgentStats:
+        return self._stats_dict[agent]
 
-    def __setitem__(self, bandit: Bandit, bandit_stats: BanditStats) -> None:
-        if bandit != bandit_stats.bandit:
-            raise StatsUsageError("bandits specified in key and value don't match")
-        self._stats_dict[bandit] = bandit_stats
+    def __setitem__(self, agent: Agent, agent_stats: AgentStats) -> None:
+        if agent != agent_stats.agent:
+            raise StatsUsageError("agents specified in key and value don't match")
+        self._stats_dict[agent] = agent_stats
 
-    def __contains__(self, bandit: Bandit) -> bool:
-        return bandit in self._stats_dict
+    def __contains__(self, agent: Agent) -> bool:
+        return agent in self._stats_dict
 
     def plot(self, metric: Metric) -> None:
-        for bandit, bandit_stats in self._stats_dict.items():
-            plt.plot(bandit_stats[metric], label=str(bandit))
+        for agent, agent_stats in self._stats_dict.items():
+            plt.plot(agent_stats[metric], label=str(agent))
         plt.legend()
         plt.show()
 
@@ -101,15 +101,15 @@ class SimulationStats:
         self.plot(metric=Metric.CUM_REWARDS if cumulative else Metric.REWARDS)
 
 
-class BanditStats:
+class AgentStats:
     def __init__(
         self,
-        bandit: Bandit,
+        agent: Agent,
         armset: ArmSet,
         steps: int,
         metrics: Iterable[Metric] | None = None,
     ):
-        self.bandit = bandit
+        self.agent = agent
         self._armset = armset
         self._steps = steps
         self._counts = np.zeros(steps)

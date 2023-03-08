@@ -1,5 +1,5 @@
-class BanditUsageError(Exception):
-    """Raised when bandit functions are called out of order"""
+class AgentUsageError(Exception):
+    """Raised when agent functions are called out of order"""
 
     pass
 
