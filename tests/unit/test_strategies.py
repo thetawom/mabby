@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 import numpy as np
 import pytest
 from numpy.random import Generator
@@ -20,6 +22,10 @@ class TestStrategy:
     @pytest.fixture(autouse=True)
     def patch_abstract_methods(self, mocker):
         mocker.patch.object(Strategy, "__abstractmethods__", set())
+
+    @pytest.fixture
+    def mock_rng(self, mocker):
+        return mocker.Mock(spec=Generator, random=lambda: 0.5, choice=lambda xs: xs[0])
 
     @pytest.fixture(params=[{}])
     def valid_params(self, request):
@@ -97,31 +103,28 @@ class TestSemiUniformStrategy(TestStrategy):
         assert not primed_strategy._Ns.any()
 
     def test_choose_with_low_rng_explores(
-        self, mocker, effective_eps, prime_params, primed_strategy
+        self, mocker, mock_rng, effective_eps, prime_params, primed_strategy
     ):
-        mock_rng = mocker.Mock(random=lambda: 0.9 * effective_eps)
+        mocker.patch.object(mock_rng, "random", return_value=0.9 * effective_eps)
         explore = mocker.spy(primed_strategy, "_explore")
         primed_strategy.choose(mock_rng)
         explore.assert_called_once_with(mock_rng)
 
     def test_choose_with_high_rng_exploits(
-        self, mocker, effective_eps, primed_strategy
+        self, mocker, mock_rng, effective_eps, primed_strategy
     ):
-        mock_rng = mocker.Mock(random=lambda: 1.1 * effective_eps)
+        mocker.patch.object(mock_rng, "random", return_value=1.1 * effective_eps)
         exploit = mocker.spy(primed_strategy, "_exploit")
         primed_strategy.choose(mock_rng)
-        exploit.assert_called_once_with()
-
-    def test_choose_without_rng_raises_error(self, primed_strategy):
-        with pytest.raises(StrategyUsageError):
-            primed_strategy.choose()
+        exploit.assert_called_once_with(mock_rng)
 
     def test_explore_follows_uniform_distribution(self):
         pass
 
     def test_exploit_returns_optimal_arm(self, primed_strategy, Qs):
+        rng = np.random.default_rng(482)
         primed_strategy._Qs = Qs
-        choice = primed_strategy._exploit()
+        choice = primed_strategy._exploit(rng=rng)
         assert Qs[choice] == max(Qs)
 
     def test_update_updates_Qs_and_Ns(
@@ -211,20 +214,20 @@ class TestUCB1Strategy(TestStrategy):
 
     @pytest.mark.parametrize("UCBs", [[0.1, 0.5, 0.3]])
     def test_choose_returns_UCB_argmax_when_t_greater_than_k(
-        self, mocker, prime_params, primed_strategy, UCBs
+        self, mocker, mock_rng, prime_params, primed_strategy, UCBs
     ):
         mocker.patch.object(primed_strategy, "_compute_UCBs", return_value=UCBs)
         compute_UCBs = mocker.spy(primed_strategy, "_compute_UCBs")
         primed_strategy._t = prime_params["k"]
-        choice = primed_strategy.choose()
+        choice = primed_strategy.choose(mock_rng)
         compute_UCBs.assert_called_once()
         assert UCBs[choice] == max(UCBs)
 
     def test_choose_returns_t_when_t_less_than_k(
-        self, prime_params, primed_strategy, reward
+        self, mock_rng, prime_params, primed_strategy, reward
     ):
         for t in range(prime_params["k"]):
-            choice = primed_strategy.choose()
+            choice = primed_strategy.choose(mock_rng)
             primed_strategy.update(choice, reward)
             assert choice == t
 
@@ -285,31 +288,26 @@ class TestBetaTSStrategy(TestStrategy):
 
     @pytest.mark.parametrize("beta_samples", [[0.1, 0.5, 0.3]])
     def test_choose_returns_beta_samples_argmax(
-        self, mocker, primed_strategy, beta_samples
+        self, mock_rng, primed_strategy, beta_samples
     ):
-        mock_rng = mocker.Mock(spec=Generator, beta=lambda a, b: beta_samples)
-        beta_spy = mocker.spy(mock_rng, "beta")
-        choice = primed_strategy.choose(mock_rng)
-        beta_spy.assert_called_once_with(a=primed_strategy._a, b=primed_strategy._b)
-        assert beta_spy.spy_return[choice] == max(beta_spy.spy_return)
-
-    def test_choose_without_rng_raises_error(self, primed_strategy):
-        with pytest.raises(StrategyUsageError):
-            primed_strategy.choose()
+        with patch.object(mock_rng, "beta", return_value=beta_samples) as beta:
+            choice = primed_strategy.choose(mock_rng)
+            beta.assert_called_once_with(a=primed_strategy._a, b=primed_strategy._b)
+            assert beta.return_value[choice] == max(beta.return_value)
 
     def test_update_increments_a_when_reward_is_1(
-        self, mocker, primed_strategy, choice
+        self, mocker, mock_rng, primed_strategy, choice
     ):
-        mock_rng = mocker.Mock(spec=Generator, binomial=lambda n, p: 1)
+        mocker.patch.object(mock_rng, "binomial", return_value=1)
         prev_a, prev_b = primed_strategy._a[choice], primed_strategy._b[choice]
         primed_strategy.update(choice, 1, mock_rng)
         assert primed_strategy._a[choice] == prev_a + 1
         assert primed_strategy._b[choice] == prev_b
 
     def test_update_increments_b_when_reward_is_0(
-        self, mocker, primed_strategy, choice
+        self, mocker, mock_rng, primed_strategy, choice
     ):
-        mock_rng = mocker.Mock(spec=Generator, binomial=lambda n, p: 0)
+        mocker.patch.object(mock_rng, "binomial", return_value=0)
         prev_a, prev_b = primed_strategy._a[choice], primed_strategy._b[choice]
         primed_strategy.update(choice, 0, mock_rng)
         assert primed_strategy._a[choice] == prev_a
@@ -317,9 +315,8 @@ class TestBetaTSStrategy(TestStrategy):
 
     @pytest.mark.parametrize("invalid_reward", [-0.2, 1.3])
     def test_update_with_invalid_reward_for_general_strategy_raises_error(
-        self, mocker, prime_params, choice, invalid_reward
+        self, mock_rng, prime_params, choice, invalid_reward
     ):
-        mock_rng = mocker.Mock(spec=Generator)
         strategy = self.STRATEGY_CLASS(general=True)
         strategy.prime(**prime_params)
         with pytest.raises(StrategyUsageError):
@@ -327,9 +324,8 @@ class TestBetaTSStrategy(TestStrategy):
 
     @pytest.mark.parametrize("invalid_reward", [-2, 0.4, 1.2])
     def test_update_with_invalid_reward_for_non_general_strategy_raises_error(
-        self, mocker, prime_params, choice, invalid_reward
+        self, mock_rng, prime_params, choice, invalid_reward
     ):
-        mock_rng = mocker.Mock(spec=Generator)
         strategy = self.STRATEGY_CLASS(general=False)
         strategy.prime(**prime_params)
         with pytest.raises(StrategyUsageError):

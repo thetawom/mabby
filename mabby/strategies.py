@@ -8,6 +8,7 @@ from numpy.typing import NDArray
 
 from mabby.agents import Agent
 from mabby.exceptions import StrategyUsageError
+from mabby.utils import random_argmax
 
 
 class Strategy(ABC):
@@ -19,7 +20,7 @@ class Strategy(ABC):
         """Set up agent before a trial run"""
 
     @abstractmethod
-    def choose(self, rng: Generator | None = None) -> int:
+    def choose(self, rng: Generator) -> int:
         """Choose an arm to play"""
 
     @abstractmethod
@@ -51,18 +52,16 @@ class SemiUniformStrategy(Strategy, ABC):
         self._Qs = np.zeros(k, dtype=np.float64)
         self._Ns = np.zeros(k, dtype=np.uint32)
 
-    def choose(self, rng: Generator | None = None) -> int:
-        if rng is None:
-            raise StrategyUsageError("semi-uniform strategies require rng")
+    def choose(self, rng: Generator) -> int:
         if rng.random() < self.effective_eps():
             return self._explore(rng=rng)
-        return self._exploit()
+        return self._exploit(rng=rng)
 
     def _explore(self, rng: Generator) -> int:
         return rng.integers(0, len(self._Ns))
 
-    def _exploit(self) -> int:
-        return int(np.argmax(self._Qs))
+    def _exploit(self, rng: Generator) -> int:
+        return random_argmax(self._Qs, rng=rng)
 
     def update(self, choice: int, reward: float, rng: Generator | None = None) -> None:
         self._Ns[choice] += 1
@@ -122,10 +121,10 @@ class UCB1Strategy(Strategy):
         self._Qs = np.zeros(k, dtype=np.float64)
         self._Ns = np.zeros(k, dtype=np.uint32)
 
-    def choose(self, rng: Generator | None = None) -> int:
+    def choose(self, rng: Generator) -> int:
         if self._t < len(self._Ns):
             return self._t
-        return int(np.argmax(self._compute_UCBs()))
+        return random_argmax(self._compute_UCBs(), rng=rng)
 
     def _compute_UCBs(self) -> NDArray[np.float64]:
         return self._Qs + self.alpha * np.sqrt(np.log(self._t) / self._Ns)
@@ -159,11 +158,9 @@ class BetaTSStrategy(Strategy):
         self._a = np.ones(k, dtype=np.uint32)
         self._b = np.ones(k, dtype=np.uint32)
 
-    def choose(self, rng: Generator | None = None) -> int:
-        if rng is None:
-            raise StrategyUsageError("TS strategies require rng")
+    def choose(self, rng: Generator) -> int:
         samples = rng.beta(a=self._a, b=self._b)
-        return int(np.argmax(samples))
+        return random_argmax(samples, rng=rng)
 
     def update(self, choice: int, reward: float, rng: Generator | None = None) -> None:
         if rng is None:
