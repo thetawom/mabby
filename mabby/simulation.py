@@ -40,9 +40,9 @@ class Simulation:
     ) -> BanditStats:
         bandit_stats = BanditStats(bandit, self.armset, steps, metrics)
         for _ in range(trials):
-            bandit.prime(len(self.armset), steps)
+            bandit.prime(len(self.armset), steps, self._rng)
             for step in range(steps):
-                choice = bandit.choose(self._rng)
+                choice = bandit.choose()
                 reward = self.armset.play(choice, self._rng)
                 bandit.update(reward)
                 bandit_stats.update(step, choice, reward)

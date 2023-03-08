@@ -16,10 +16,10 @@ class GenericStrategy(Strategy):
     def prime(self, k: int, steps: int) -> None:
         self.k = k
 
-    def choose(self, rng: Generator | None = None) -> int:
+    def choose(self, rng: Generator) -> int:
         return 0
 
-    def update(self, choice: int, reward: float) -> None:
+    def update(self, choice: int, reward: float, rng: Generator) -> None:
         pass
 
     @property
