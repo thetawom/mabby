@@ -1,8 +1,10 @@
 import numpy as np
 import pytest
+from numpy.random import Generator
 
 from mabby.exceptions import BanditUsageError
 from mabby.strategies import (
+    BetaTSStrategy,
     EpsilonGreedyStrategy,
     RandomStrategy,
     SemiUniformStrategy,
@@ -130,7 +132,7 @@ class TestSemiUniformStrategy(TestStrategy):
         assert primed_strategy.Ns == Ns
 
 
-class TestRandomBandit(TestSemiUniformStrategy):
+class TestRandomStrategy(TestSemiUniformStrategy):
     STRATEGY_CLASS = RandomStrategy
 
     @pytest.fixture(params=[{}])
@@ -144,7 +146,7 @@ class TestRandomBandit(TestSemiUniformStrategy):
         assert strategy.effective_eps() == 1
 
 
-class TestEpsilonGreedyBandit(TestSemiUniformStrategy):
+class TestEpsilonGreedyStrategy(TestSemiUniformStrategy):
     STRATEGY_CLASS = EpsilonGreedyStrategy
 
     @pytest.fixture(params=[{"eps": 0.1}])
@@ -165,7 +167,7 @@ class TestEpsilonGreedyBandit(TestSemiUniformStrategy):
         assert strategy.effective_eps() == valid_params["eps"]
 
 
-class TestUCB1Bandit(TestStrategy):
+class TestUCB1Strategy(TestStrategy):
     STRATEGY_CLASS = UCB1Strategy
 
     @pytest.fixture(params=[{"alpha": 0.3}])
@@ -246,3 +248,93 @@ class TestUCB1Bandit(TestStrategy):
     def test_Ns_returns_Ns(self, primed_strategy, Qs_Ns):
         primed_strategy._Ns = Qs_Ns[1]
         assert primed_strategy.Ns == Qs_Ns[1]
+
+
+class TestBetaTSStrategy(TestStrategy):
+    STRATEGY_CLASS = BetaTSStrategy
+
+    @pytest.fixture(params=[{"general": True}, {"general": False}])
+    def valid_params(self, request):
+        return request.param
+
+    @pytest.fixture(params=[([1, 4, 2], [2, 3, 1]), ([2, 6], [5, 3])])
+    def a_b(self, request):
+        return request.param
+
+    def test_init_sets_general(self, valid_params, strategy):
+        assert strategy.general == valid_params["general"]
+
+    def test_repr_includes_general(self, valid_params, strategy):
+        assert valid_params["general"] == ("generalized" in repr(strategy))
+
+    def test_prime_inits_a_and_b(self, prime_params, primed_strategy):
+        assert isinstance(primed_strategy._a, np.ndarray)
+        assert isinstance(primed_strategy._b, np.ndarray)
+        assert len(primed_strategy._a) == prime_params["k"]
+        assert len(primed_strategy._b) == prime_params["k"]
+
+    @pytest.mark.parametrize("beta_samples", [[0.1, 0.5, 0.3]])
+    def test_choose_returns_beta_samples_argmax(
+        self, mocker, primed_strategy, beta_samples
+    ):
+        mock_rng = mocker.Mock(spec=Generator, beta=lambda a, b: beta_samples)
+        beta_spy = mocker.spy(mock_rng, "beta")
+        choice = primed_strategy.choose(mock_rng)
+        beta_spy.assert_called_once_with(a=primed_strategy._a, b=primed_strategy._b)
+        assert beta_spy.spy_return[choice] == max(beta_spy.spy_return)
+
+    def test_choose_without_rng_raises_error(self, primed_strategy):
+        with pytest.raises(BanditUsageError):
+            primed_strategy.choose()
+
+    def test_update_increments_a_when_reward_is_1(
+        self, mocker, primed_strategy, choice
+    ):
+        mock_rng = mocker.Mock(spec=Generator, binomial=lambda n, p: 1)
+        prev_a, prev_b = primed_strategy._a[choice], primed_strategy._b[choice]
+        primed_strategy.update(choice, 1, mock_rng)
+        assert primed_strategy._a[choice] == prev_a + 1
+        assert primed_strategy._b[choice] == prev_b
+
+    def test_update_increments_b_when_reward_is_0(
+        self, mocker, primed_strategy, choice
+    ):
+        mock_rng = mocker.Mock(spec=Generator, binomial=lambda n, p: 0)
+        prev_a, prev_b = primed_strategy._a[choice], primed_strategy._b[choice]
+        primed_strategy.update(choice, 0, mock_rng)
+        assert primed_strategy._a[choice] == prev_a
+        assert primed_strategy._b[choice] == prev_b + 1
+
+    @pytest.mark.parametrize("invalid_reward", [-0.2, 1.3])
+    def test_update_with_invalid_reward_for_general_strategy_raises_error(
+        self, mocker, prime_params, choice, invalid_reward
+    ):
+        mock_rng = mocker.Mock(spec=Generator)
+        strategy = self.STRATEGY_CLASS(general=True)
+        strategy.prime(**prime_params)
+        with pytest.raises(BanditUsageError):
+            strategy.update(choice, invalid_reward, mock_rng)
+
+    @pytest.mark.parametrize("invalid_reward", [-2, 0.4, 1.2])
+    def test_update_with_invalid_reward_for_non_general_strategy_raises_error(
+        self, mocker, prime_params, choice, invalid_reward
+    ):
+        mock_rng = mocker.Mock(spec=Generator)
+        strategy = self.STRATEGY_CLASS(general=False)
+        strategy.prime(**prime_params)
+        with pytest.raises(BanditUsageError):
+            strategy.update(choice, invalid_reward, mock_rng)
+
+    def test_update_without_rng_raises_error(self, primed_strategy, choice, reward):
+        with pytest.raises(BanditUsageError):
+            primed_strategy.update(choice, reward)
+
+    def test_Qs_returns_beta_mean(self, primed_strategy, a_b):
+        a, b = np.array(a_b[0]), np.array(a_b[1])
+        primed_strategy._a, primed_strategy._b = a, b
+        np.testing.assert_array_equal(primed_strategy.Qs, a / (a + b))
+
+    def test_Ns_returns_counts(self, primed_strategy, a_b):
+        a, b = np.array(a_b[0]), np.array(a_b[1])
+        primed_strategy._a, primed_strategy._b = a, b
+        np.testing.assert_array_equal(primed_strategy.Ns, a + b - 2)
