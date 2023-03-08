@@ -4,7 +4,7 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from mabby import ArmSet, Simulation
+from mabby import Bandit, Simulation
 from mabby.exceptions import StatsUsageError
 from mabby.stats import AgentStats, Metric, SimulationStats
 
@@ -79,9 +79,9 @@ class TestAgentStats:
         return agent_factory.generic()
 
     @pytest.fixture
-    def armset(self, arm_factory, num_arms):
+    def bandit(self, arm_factory, num_arms):
         arms = [arm_factory.generic(mean=random.random()) for _ in range(num_arms)]
-        return ArmSet(arms=arms)
+        return Bandit(arms=arms)
 
     @pytest.fixture(params=[10])
     def steps(self, request):
@@ -100,8 +100,8 @@ class TestAgentStats:
         return random.randint(0, num_arms - 1)
 
     @pytest.fixture
-    def opt_choice(self, armset):
-        return armset.best_arm()
+    def opt_choice(self, bandit):
+        return bandit.best_arm()
 
     @pytest.fixture
     def non_opt_choice(self, opt_choice):
@@ -112,19 +112,19 @@ class TestAgentStats:
         return request.param
 
     @pytest.fixture
-    def agent_stats(self, agent, armset, steps):
-        return AgentStats(agent=agent, armset=armset, steps=steps)
+    def agent_stats(self, agent, bandit, steps):
+        return AgentStats(agent=agent, bandit=bandit, steps=steps)
 
-    def test_init_sets_agent_armset_and_steps(self, agent_stats, agent, armset, steps):
+    def test_init_sets_agent_bandit_and_steps(self, agent_stats, agent, bandit, steps):
         assert agent_stats.agent == agent
-        assert agent_stats._armset == armset
+        assert agent_stats._bandit == bandit
         assert agent_stats._steps == steps
 
     def test_init_with_no_metrics_creates_correct_stats_dictionary(
-        self, mocker, agent, armset, steps
+        self, mocker, agent, bandit, steps
     ):
         map_to_base_spy = mocker.spy(Metric, "map_to_base")
-        agent_stats = AgentStats(agent=agent, armset=armset, steps=steps)
+        agent_stats = AgentStats(agent=agent, bandit=bandit, steps=steps)
         map_to_base_spy.assert_called_once_with(list(Metric))
         assert set(agent_stats._stats.keys()) == set(BASE_METRICS)
         for stat_values in agent_stats._stats.values():
@@ -135,11 +135,11 @@ class TestAgentStats:
         [([Metric.REGRET, Metric.CUM_REWARDS], [Metric.REGRET, Metric.REWARDS])],
     )
     def test_init_with_metrics_creates_correct_stats_dictionary(
-        self, mocker, agent, armset, steps, metrics, base_metrics
+        self, mocker, agent, bandit, steps, metrics, base_metrics
     ):
         map_to_base_spy = mocker.spy(Metric, "map_to_base")
         agent_stats = AgentStats(
-            agent=agent, armset=armset, steps=steps, metrics=metrics
+            agent=agent, bandit=bandit, steps=steps, metrics=metrics
         )
         map_to_base_spy.assert_called_once_with(metrics)
         assert set(agent_stats._stats.keys()) == set(base_metrics)
@@ -166,19 +166,19 @@ class TestAgentStats:
 
     @pytest.mark.parametrize("metrics", [[Metric.CUM_REGRET], [Metric.REGRET]])
     def test_update_keeps_regret_when_optimal(
-        self, agent, armset, metrics, steps, step, opt_choice, reward
+        self, agent, bandit, metrics, steps, step, opt_choice, reward
     ):
-        agent_stats = AgentStats(agent, armset, steps, metrics)
+        agent_stats = AgentStats(agent, bandit, steps, metrics)
         prev_regret = agent_stats._stats[Metric.REGRET][step]
         agent_stats.update(step=step, choice=opt_choice, reward=reward)
         assert agent_stats._stats[Metric.REGRET][step] == prev_regret
 
     @pytest.mark.parametrize("metrics", [[Metric.CUM_REGRET], [Metric.REGRET]])
     def test_update_updates_regret_when_not_optimal(
-        self, mocker, agent, armset, metrics, steps, step, non_opt_choice, reward
+        self, mocker, agent, bandit, metrics, steps, step, non_opt_choice, reward
     ):
-        regret_spy = mocker.spy(armset, "regret")
-        agent_stats = AgentStats(agent, armset, steps, metrics)
+        regret_spy = mocker.spy(bandit, "regret")
+        agent_stats = AgentStats(agent, bandit, steps, metrics)
         prev_regret = agent_stats._stats[Metric.REGRET][step]
         agent_stats.update(step=step, choice=non_opt_choice, reward=reward)
         assert (
@@ -188,29 +188,29 @@ class TestAgentStats:
 
     @pytest.mark.parametrize("metrics", [[Metric.OPTIMALITY]])
     def test_update_increments_optimality_when_optimal(
-        self, agent, armset, metrics, steps, step, opt_choice, reward
+        self, agent, bandit, metrics, steps, step, opt_choice, reward
     ):
-        agent_stats = AgentStats(agent, armset, steps, metrics)
+        agent_stats = AgentStats(agent, bandit, steps, metrics)
         prev_optimality = agent_stats._stats[Metric.OPTIMALITY][step]
         agent_stats.update(step=step, choice=opt_choice, reward=reward)
         assert agent_stats._stats[Metric.OPTIMALITY][step] == prev_optimality + 1
 
     @pytest.mark.parametrize("metrics", [[Metric.OPTIMALITY]])
     def test_update_keeps_optimality_when_not_optimal(
-        self, agent, armset, metrics, steps, step, non_opt_choice, reward
+        self, agent, bandit, metrics, steps, step, non_opt_choice, reward
     ):
-        agent_stats = AgentStats(agent, armset, steps, metrics)
+        agent_stats = AgentStats(agent, bandit, steps, metrics)
         prev_optimality = agent_stats._stats[Metric.OPTIMALITY][step]
         agent_stats.update(step=step, choice=non_opt_choice, reward=reward)
-        print("opt_choice", armset.best_arm())
+        print("opt_choice", bandit.best_arm())
         print("non_opt_choice", non_opt_choice)
         assert agent_stats._stats[Metric.OPTIMALITY][step] == prev_optimality
 
     @pytest.mark.parametrize("metrics", [[Metric.CUM_REWARDS], [Metric.REWARDS]])
     def test_update_updates_rewards(
-        self, agent, armset, metrics, steps, step, choice, reward
+        self, agent, bandit, metrics, steps, step, choice, reward
     ):
-        agent_stats = AgentStats(agent, armset, steps, metrics)
+        agent_stats = AgentStats(agent, bandit, steps, metrics)
         prev_rewards = agent_stats._stats[Metric.REWARDS][step]
         agent_stats.update(step=step, choice=choice, reward=reward)
         assert agent_stats._stats[Metric.REWARDS][step] == prev_rewards + reward
@@ -230,30 +230,30 @@ class TestSimulationStats:
         return random.choice(agents)
 
     @pytest.fixture(params=[3])
-    def armset(self, request, arm_factory):
+    def bandit(self, request, arm_factory):
         arms = [arm_factory.generic(mean=random.random()) for _ in range(request.param)]
-        return ArmSet(arms=arms)
+        return Bandit(arms=arms)
 
     @pytest.fixture
-    def simulation(self, agents, armset):
-        return Simulation(agents=agents, armset=armset)
+    def simulation(self, agents, bandit):
+        return Simulation(agents=agents, bandit=bandit)
 
     @pytest.fixture(params=[10])
     def steps(self, request):
         return request.param
 
     @pytest.fixture
-    def agent_stats(self, agent, armset, steps):
-        return AgentStats(agent=agent, armset=armset, steps=steps)
+    def agent_stats(self, agent, bandit, steps):
+        return AgentStats(agent=agent, bandit=bandit, steps=steps)
 
     @pytest.fixture
     def sim_stats(self, simulation):
         return SimulationStats(simulation=simulation)
 
     @pytest.fixture
-    def filled_sim_stats(self, sim_stats, agents, armset, steps):
+    def filled_sim_stats(self, sim_stats, agents, bandit, steps):
         for agent in agents:
-            sim_stats.add(AgentStats(agent, armset, steps))
+            sim_stats.add(AgentStats(agent, bandit, steps))
         return sim_stats
 
     @pytest.fixture

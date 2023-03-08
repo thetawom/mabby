@@ -22,14 +22,14 @@ class Arm(ABC):
         """Compute mean of reward distribution"""
 
     @classmethod
-    def armset(cls, **kwargs: list[float]) -> ArmSet:
+    def bandit(cls, **kwargs: list[float]) -> Bandit:
         params_dicts = [dict(zip(kwargs, t)) for t in zip(*kwargs.values())]
         if len(params_dicts) == 0:
             raise ValueError("insufficient parameters to create an arm")
-        return ArmSet([cls(**params) for params in params_dicts])
+        return Bandit([cls(**params) for params in params_dicts])
 
 
-class ArmSet:
+class Bandit:
     def __init__(self, arms: list[Arm]):
         self._arms = arms
 

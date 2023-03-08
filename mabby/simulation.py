@@ -9,17 +9,17 @@ from mabby.agents import Agent
 from mabby.stats import AgentStats, Metric, SimulationStats
 
 if TYPE_CHECKING:
-    from mabby.arms import ArmSet
+    from mabby.bandit import Bandit
 
 
 class Simulation:
     def __init__(
-        self, agents: Iterable[Agent], armset: ArmSet, seed: int | None = None
+        self, agents: Iterable[Agent], bandit: Bandit, seed: int | None = None
     ):
         self.agents = agents
-        if len(armset) == 0:
-            raise ValueError("ArmSet cannot be empty")
-        self.armset = armset
+        if len(bandit) == 0:
+            raise ValueError("Bandit cannot be empty")
+        self.bandit = bandit
         self._rng = np.random.default_rng(seed)
 
     def run(
@@ -38,12 +38,12 @@ class Simulation:
         steps: int,
         metrics: Iterable[Metric] | None = None,
     ) -> AgentStats:
-        agent_stats = AgentStats(agent, self.armset, steps, metrics)
+        agent_stats = AgentStats(agent, self.bandit, steps, metrics)
         for _ in range(trials):
-            agent.prime(len(self.armset), steps, self._rng)
+            agent.prime(len(self.bandit), steps, self._rng)
             for step in range(steps):
                 choice = agent.choose()
-                reward = self.armset.play(choice, self._rng)
+                reward = self.bandit.play(choice, self._rng)
                 agent.update(reward)
                 agent_stats.update(step, choice, reward)
         return agent_stats
