@@ -25,15 +25,16 @@ Below is an example of a simple simulation comparing two epsilon-greedy bandits 
 ```python
 import mabby as mb
 
-explore_bandit = mb.EpsilonGreedyBandit(eps=0.8)
-exploit_bandit = mb.EpsilonGreedyBandit(eps=0.1)
+eps_greedy_bandit = mb.EpsilonGreedyBandit(eps=0.2)
+ucb_bandit = mb.UCB1Bandit(alpha=0.5)
+ts_bandit = mb.BetaTSBandit(general=True)
 sim = mb.Simulation(
-    bandits=[explore_bandit, exploit_bandit],
-    armset=mb.BernoulliArm.armset(p=[0.2, 0.6]),
+    bandits=[eps_greedy_bandit, ucb_bandit, ts_bandit],
+    armset=mb.BernoulliArm.armset(p=[0.5, 0.6, 0.7, 0.8]),
 )
-stats = sim.run(trials=100, steps=200)
-stats.plot_regret()
+stats = sim.run(trials=100, steps=300)
 
-print("eps=0.8: ", explore_bandit.Qs)
-print("eps=0.1: ", exploit_bandit.Qs)
+stats.plot_regret(cumulative=True)
+stats.plot_optimality()
+stats.plot_rewards(cumulative=True)
 ```
