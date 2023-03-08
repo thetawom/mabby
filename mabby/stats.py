@@ -35,7 +35,7 @@ class Metric(Enum):
         label: str,
         base: str | None = None,
         transform: Callable[[NDArray[np.float64]], NDArray[np.float64]] | None = None,
-    ):
+    ) -> None:
         self.__class__.__MAPPING__[self._name_] = self
         self._label = label
         self._mapping: MetricMapping | None = (
@@ -58,7 +58,7 @@ class Metric(Enum):
 
     @classmethod
     def map_to_base(cls, metrics: Iterable[Metric]) -> Iterable[Metric]:
-        return set(m.base for m in metrics)
+        return {m.base for m in metrics}
 
     def transform(self, values: NDArray[np.float64]) -> NDArray[np.float64]:
         if self._mapping is not None:
@@ -67,7 +67,7 @@ class Metric(Enum):
 
 
 class SimulationStats:
-    def __init__(self, simulation: Simulation):
+    def __init__(self, simulation: Simulation) -> None:
         self._simulation: Simulation = simulation
         self._stats_dict: dict[Agent, AgentStats] = {}
 
@@ -108,7 +108,7 @@ class AgentStats:
         bandit: Bandit,
         steps: int,
         metrics: Iterable[Metric] | None = None,
-    ):
+    ) -> None:
         self.agent = agent
         self._bandit = bandit
         self._steps = steps

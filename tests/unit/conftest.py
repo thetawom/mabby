@@ -15,13 +15,13 @@ from mabby.strategies import Strategy
 class GenericStrategy(Strategy):
     k: int
 
-    def prime(self, k: int, steps: int) -> None:
+    def prime(self, k: int, _: int) -> None:
         self.k = k
 
-    def choose(self, rng: Generator) -> int:
+    def choose(self, _: Generator) -> int:
         return 0
 
-    def update(self, choice: int, reward: float, rng: Generator) -> None:
+    def update(self, choice: int, reward: float, rng: Generator | None = None) -> None:
         pass
 
     @property
@@ -34,10 +34,10 @@ class GenericStrategy(Strategy):
 
 
 class GenericArm(Arm):
-    def __init__(self, mean: float = 0):
+    def __init__(self, mean: float = 0) -> None:
         self._mean = mean
 
-    def play(self, rng: Generator) -> float:
+    def play(self, _: Generator) -> float:
         return 1
 
     @property
@@ -45,7 +45,7 @@ class GenericArm(Arm):
         return self._mean
 
 
-@pytest.fixture
+@pytest.fixture()
 def strategy_factory():
     class GenericStrategyFactory:
         @staticmethod
@@ -55,7 +55,7 @@ def strategy_factory():
     return GenericStrategyFactory
 
 
-@pytest.fixture
+@pytest.fixture()
 def agent_factory(strategy_factory):
     class GenericAgentFactory:
         @staticmethod
@@ -66,7 +66,7 @@ def agent_factory(strategy_factory):
     return GenericAgentFactory
 
 
-@pytest.fixture
+@pytest.fixture()
 def arm_factory():
     class GenericArmFactory:
         @staticmethod

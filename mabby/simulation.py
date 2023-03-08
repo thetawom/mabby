@@ -23,7 +23,7 @@ class Simulation:
         strategies: Iterable[Strategy] | None = None,
         names: Iterable[str] | None = None,
         seed: int | None = None,
-    ):
+    ) -> None:
         self.agents = self._create_agents(agents, strategies, names)
         if len(list(self.agents)) == 0:
             raise ValueError("no strategies or agents were supplied")

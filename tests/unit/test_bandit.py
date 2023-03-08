@@ -16,11 +16,11 @@ class TestArm:
     def patch_abstract_methods(self, mocker):
         mocker.patch.object(Arm, "__abstractmethods__", new_callable=set)
 
-    @pytest.fixture
+    @pytest.fixture()
     def valid_params(self):
         pass
 
-    @pytest.fixture
+    @pytest.fixture()
     def arm(self, valid_params):
         return self.ARM_CLASS(**valid_params)
 
@@ -32,7 +32,7 @@ class TestArm:
     def invalid_bandit_params(self, request):
         return request.param
 
-    @pytest.fixture
+    @pytest.fixture()
     def bandit(self, bandit_params):
         return self.ARM_CLASS.bandit(**bandit_params)
 
@@ -112,7 +112,7 @@ class TestBandit:
     def num_arms(self, request):
         return request.param
 
-    @pytest.fixture
+    @pytest.fixture()
     def arms(self, num_arms, arm_factory):
         return [arm_factory.generic() for _ in range(num_arms)]
 
@@ -159,11 +159,11 @@ class TestBandit:
         assert len(values) == num_arms
         assert np.allclose(counts, np.mean(counts), rtol=0.1)
 
-    def test_is_opt_returns_true_for_optimal_choice(self, arms, bandit):
+    def test_is_opt_returns_true_for_optimal_choice(self, bandit):
         opt_choice = int(np.argmax(bandit.means))
         assert bandit.is_opt(opt_choice)
 
-    def test_is_opt_returns_false_for_non_optimal_choice(self, arms, bandit):
+    def test_is_opt_returns_false_for_non_optimal_choice(self, bandit):
         non_opt_choice = int(np.argmin(bandit.means))
         assert not bandit.is_opt(non_opt_choice)
 

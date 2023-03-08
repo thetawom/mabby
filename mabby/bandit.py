@@ -11,7 +11,7 @@ from mabby.utils import random_argmax
 
 class Arm(ABC):
     @abstractmethod
-    def __init__(self, **kwargs: float):
+    def __init__(self, **kwargs: float) -> None:
         pass
 
     @abstractmethod
@@ -34,7 +34,7 @@ class Arm(ABC):
 class Bandit:
     def __init__(
         self, arms: list[Arm], rng: Generator | None = None, seed: int | None = None
-    ):
+    ) -> None:
         self._arms = arms
         self._rng = rng if rng else np.random.default_rng(seed)
 
@@ -68,7 +68,7 @@ class Bandit:
 
 
 class BernoulliArm(Arm):
-    def __init__(self, p: float):
+    def __init__(self, p: float) -> None:
         self.p = p
 
     def play(self, rng: Generator) -> int:
@@ -83,7 +83,7 @@ class BernoulliArm(Arm):
 
 
 class GaussianArm(Arm):
-    def __init__(self, loc: float, scale: float):
+    def __init__(self, loc: float, scale: float) -> None:
         self.loc = loc
         self.scale = scale
 

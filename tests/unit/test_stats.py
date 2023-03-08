@@ -74,11 +74,11 @@ class TestMetric:
 
 
 class TestAgentStats:
-    @pytest.fixture
+    @pytest.fixture()
     def agent(self, agent_factory):
         return agent_factory.generic()
 
-    @pytest.fixture
+    @pytest.fixture()
     def bandit(self, arm_factory, num_arms):
         arms = [arm_factory.generic(mean=random.random()) for _ in range(num_arms)]
         return Bandit(arms=arms)
@@ -87,7 +87,7 @@ class TestAgentStats:
     def steps(self, request):
         return request.param
 
-    @pytest.fixture
+    @pytest.fixture()
     def step(self, steps):
         return random.randint(0, steps - 1)
 
@@ -95,15 +95,15 @@ class TestAgentStats:
     def num_arms(self, request):
         return request.param
 
-    @pytest.fixture
+    @pytest.fixture()
     def choice(self, num_arms):
         return random.randint(0, num_arms - 1)
 
-    @pytest.fixture
+    @pytest.fixture()
     def opt_choice(self, bandit):
         return int(np.argmax(bandit.means))
 
-    @pytest.fixture
+    @pytest.fixture()
     def non_opt_choice(self, bandit):
         return int(np.argmin(bandit.means))
 
@@ -111,7 +111,7 @@ class TestAgentStats:
     def reward(self, request):
         return request.param
 
-    @pytest.fixture
+    @pytest.fixture()
     def agent_stats(self, agent, bandit, steps):
         return AgentStats(agent=agent, bandit=bandit, steps=steps)
 
@@ -131,7 +131,7 @@ class TestAgentStats:
             assert len(stat_values) == steps
 
     @pytest.mark.parametrize(
-        "metrics,base_metrics",
+        ("metrics", "base_metrics"),
         [([Metric.REGRET, Metric.CUM_REWARDS], [Metric.REGRET, Metric.REWARDS])],
     )
     def test_init_with_metrics_creates_correct_stats_dictionary(
@@ -225,7 +225,7 @@ class TestSimulationStats:
     def agents(self, request, agent_factory):
         return [agent_factory.generic() for _ in range(request.param)]
 
-    @pytest.fixture
+    @pytest.fixture()
     def agent(self, agents):
         return random.choice(agents)
 
@@ -234,7 +234,7 @@ class TestSimulationStats:
         arms = [arm_factory.generic(mean=random.random()) for _ in range(request.param)]
         return Bandit(arms=arms)
 
-    @pytest.fixture
+    @pytest.fixture()
     def simulation(self, agents, bandit):
         return Simulation(agents=agents, bandit=bandit)
 
@@ -242,21 +242,21 @@ class TestSimulationStats:
     def steps(self, request):
         return request.param
 
-    @pytest.fixture
+    @pytest.fixture()
     def agent_stats(self, agent, bandit, steps):
         return AgentStats(agent=agent, bandit=bandit, steps=steps)
 
-    @pytest.fixture
+    @pytest.fixture()
     def sim_stats(self, simulation):
         return SimulationStats(simulation=simulation)
 
-    @pytest.fixture
+    @pytest.fixture()
     def filled_sim_stats(self, sim_stats, agents, bandit, steps):
         for agent in agents:
             sim_stats.add(AgentStats(agent, bandit, steps))
         return sim_stats
 
-    @pytest.fixture
+    @pytest.fixture()
     def plot_spy(self, mocker, filled_sim_stats):
         return mocker.spy(filled_sim_stats, "plot")
 

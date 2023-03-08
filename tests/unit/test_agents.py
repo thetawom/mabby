@@ -27,20 +27,20 @@ class TestAgent:
     def reward(self, request):
         return request.param
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_rng(self, mocker):
         return mocker.Mock(spec=Generator)
 
-    @pytest.fixture
+    @pytest.fixture()
     def agent(self, valid_params):
         return self.AGENT_CLASS(**valid_params)
 
-    @pytest.fixture
+    @pytest.fixture()
     def primed_agent(self, prime_params, mock_rng, agent):
         agent.prime(**prime_params, rng=mock_rng)
         return agent
 
-    @pytest.fixture
+    @pytest.fixture()
     def chosen_agent(self, choice, primed_agent):
         primed_agent._choice = choice
         return primed_agent

@@ -22,7 +22,7 @@ def test_random_bernoulli_agents_simulation(p, num_agents):
         assert np.isclose(agent.Ns, np.mean(agent.Ns), rtol=0.05).all()
 
 
-@pytest.mark.parametrize("loc,scale", [([2, -2], [0.5, 0.5])])
+@pytest.mark.parametrize(("loc", "scale"), [([2, -2], [0.5, 0.5])])
 @pytest.mark.parametrize("num_agents", [2])
 def test_random_gaussian_agents_simulation(loc, scale, num_agents):
     bandit = GaussianArm.bandit(loc=loc, scale=scale)
@@ -47,7 +47,7 @@ def test_epsilon_greedy_bernoulli_agents_simulation(p, eps):
         assert np.isclose(agent.Qs[opt_arm], p[opt_arm], rtol=0.05)
 
 
-@pytest.mark.parametrize("loc,scale", [([0.2, 0.6], [0.5, 0.5])])
+@pytest.mark.parametrize(("loc", "scale"), [([0.2, 0.6], [0.5, 0.5])])
 @pytest.mark.parametrize("eps", [[0.1, 0.3]])
 def test_epsilon_greedy_gaussian_agents_simulation(loc, scale, eps):
     bandit = GaussianArm.bandit(loc=loc, scale=scale)

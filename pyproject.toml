@@ -31,7 +31,7 @@ pytest-xdist = "^3.2.0"
 [tool.ruff]
 target-version = "py39"
 line-length = 88
-select = ["E", "F", "I", "UP", "B", "Q", "SIM", "NPY", "RUF", "C90"]
+select = ["E", "F", "C90", "I", "UP", "B", "C4", "Q", "SIM", "ARG", "NPY", "RUF"]
 
 [build-system]
 build-backend = "poetry.core.masonry.api"

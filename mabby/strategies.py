@@ -12,7 +12,7 @@ from mabby.utils import random_argmax
 
 
 class Strategy(ABC):
-    def __init__(self, **kwargs: float) -> None:
+    def __init__(self, **_: float) -> None:
         super().__init__()
 
     @abstractmethod
@@ -45,10 +45,10 @@ class SemiUniformStrategy(Strategy, ABC):
     _Qs: NDArray[np.float64]
     _Ns: NDArray[np.uint32]
 
-    def __init__(self, **kwargs: float) -> None:
+    def __init__(self, **_: float) -> None:
         super().__init__()
 
-    def prime(self, k: int, steps: int) -> None:
+    def prime(self, k: int, _: int) -> None:
         self._Qs = np.zeros(k, dtype=np.float64)
         self._Ns = np.zeros(k, dtype=np.uint32)
 
@@ -63,7 +63,7 @@ class SemiUniformStrategy(Strategy, ABC):
     def _exploit(self, rng: Generator) -> int:
         return random_argmax(self._Qs, rng=rng)
 
-    def update(self, choice: int, reward: float, rng: Generator | None = None) -> None:
+    def update(self, choice: int, reward: float, _: Generator | None = None) -> None:
         self._Ns[choice] += 1
         self._Qs[choice] += (reward - self._Qs[choice]) / self._Ns[choice]
 
@@ -116,7 +116,7 @@ class UCB1Strategy(Strategy):
     def __repr__(self) -> str:
         return f"ucb1 (alpha={self.alpha})"
 
-    def prime(self, k: int, steps: int) -> None:
+    def prime(self, k: int, _: int) -> None:
         self._t = 0
         self._Qs = np.zeros(k, dtype=np.float64)
         self._Ns = np.zeros(k, dtype=np.uint32)
@@ -129,7 +129,7 @@ class UCB1Strategy(Strategy):
     def _compute_UCBs(self) -> NDArray[np.float64]:
         return self._Qs + self.alpha * np.sqrt(np.log(self._t) / self._Ns)
 
-    def update(self, choice: int, reward: float, rng: Generator | None = None) -> None:
+    def update(self, choice: int, reward: float, _: Generator | None = None) -> None:
         self._t += 1
         self._Ns[choice] += 1
         self._Qs[choice] += (reward - self._Qs[choice]) / self._Ns[choice]
@@ -147,14 +147,14 @@ class BetaTSStrategy(Strategy):
     _a: NDArray[np.uint32]
     _b: NDArray[np.uint32]
 
-    def __init__(self, general: bool = False):
+    def __init__(self, general: bool = False) -> None:
         super().__init__()
         self.general = general
 
     def __repr__(self) -> str:
         return f"{'generalized ' if self.general else ''}beta ts"
 
-    def prime(self, k: int, steps: int) -> None:
+    def prime(self, k: int, _: int) -> None:
         self._a = np.ones(k, dtype=np.uint32)
         self._b = np.ones(k, dtype=np.uint32)
 

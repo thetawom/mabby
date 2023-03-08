@@ -15,7 +15,7 @@ if TYPE_CHECKING:
 class Agent:
     _rng: Generator
 
-    def __init__(self, strategy: Strategy, name: str | None = None):
+    def __init__(self, strategy: Strategy, name: str | None = None) -> None:
         self.strategy = strategy
         self._name = name
         self._primed = False

@@ -19,28 +19,28 @@ def num_arms(request):
     return request.param
 
 
-@pytest.fixture
+@pytest.fixture()
 def agents(num_agents, agent_factory):
     return [agent_factory.generic() for _ in range(num_agents)]
 
 
-@pytest.fixture
+@pytest.fixture()
 def agent(agents):
     return random.choice(agents)
 
 
-@pytest.fixture
+@pytest.fixture()
 def strategies(num_agents, strategy_factory):
     return [strategy_factory.generic() for _ in range(num_agents)]
 
 
-@pytest.fixture
+@pytest.fixture()
 def bandit(num_arms, arm_factory):
     arms = [arm_factory.generic() for _ in range(num_arms)]
     return Bandit(arms=arms)
 
 
-@pytest.fixture
+@pytest.fixture()
 def simulation(agents, bandit):
     return Simulation(agents=agents, bandit=bandit)
 

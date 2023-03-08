@@ -23,7 +23,7 @@ class TestStrategy:
     def patch_abstract_methods(self, mocker):
         mocker.patch.object(Strategy, "__abstractmethods__", set())
 
-    @pytest.fixture
+    @pytest.fixture()
     def mock_rng(self, mocker):
         return mocker.Mock(spec=Generator, random=lambda: 0.5, choice=lambda xs: xs[0])
 
@@ -47,11 +47,11 @@ class TestStrategy:
     def reward(self, request):
         return request.param
 
-    @pytest.fixture
+    @pytest.fixture()
     def strategy(self, valid_params):
         return self.STRATEGY_CLASS(**valid_params)
 
-    @pytest.fixture
+    @pytest.fixture()
     def primed_strategy(self, strategy, prime_params):
         strategy.prime(**prime_params)
         return strategy
@@ -103,7 +103,7 @@ class TestSemiUniformStrategy(TestStrategy):
         assert not primed_strategy._Ns.any()
 
     def test_choose_with_low_rng_explores(
-        self, mocker, mock_rng, effective_eps, prime_params, primed_strategy
+        self, mocker, mock_rng, effective_eps, primed_strategy
     ):
         mocker.patch.object(mock_rng, "random", return_value=0.9 * effective_eps)
         explore = mocker.spy(primed_strategy, "_explore")

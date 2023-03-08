@@ -4,7 +4,7 @@ import pytest
 from mabby.utils import random_argmax
 
 
-@pytest.fixture
+@pytest.fixture()
 def rng():
     return np.random.default_rng(83271)
 
