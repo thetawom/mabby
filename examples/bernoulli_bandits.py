@@ -5,7 +5,7 @@ ucb_agent = mb.UCB1Agent(alpha=0.5)
 ts_agent = mb.BetaTSAgent(general=True)
 sim = mb.Simulation(
     agents=[eps_greedy_agent, ucb_agent, ts_agent],
-    armset=mb.BernoulliArm.armset(p=[0.5, 0.6, 0.7, 0.8]),
+    bandit=mb.BernoulliArm.bandit(p=[0.5, 0.6, 0.7, 0.8]),
 )
 stats = sim.run(trials=100, steps=300)
 

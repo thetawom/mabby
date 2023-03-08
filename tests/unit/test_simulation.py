@@ -4,7 +4,7 @@ import pytest
 from numpy.random import Generator
 
 from mabby import Simulation
-from mabby.arms import ArmSet
+from mabby.bandit import Bandit
 from mabby.stats import AgentStats, SimulationStats
 
 
@@ -29,14 +29,14 @@ def agent(agents):
 
 
 @pytest.fixture
-def armset(num_arms, arm_factory):
+def bandit(num_arms, arm_factory):
     arms = [arm_factory.generic() for _ in range(num_arms)]
-    return ArmSet(arms=arms)
+    return Bandit(arms=arms)
 
 
 @pytest.fixture
-def simulation(agents, armset):
-    return Simulation(agents=agents, armset=armset)
+def simulation(agents, bandit):
+    return Simulation(agents=agents, bandit=bandit)
 
 
 @pytest.fixture(params=[{"trials": 3, "steps": 2}])
@@ -45,23 +45,23 @@ def run_params(request):
 
 
 class TestSimulation:
-    def test_init_sets_agents_armset_and_rng(self, agents, armset, simulation):
+    def test_init_sets_agents_bandit_and_rng(self, agents, bandit, simulation):
         assert simulation.agents == agents
-        assert simulation.armset == armset
+        assert simulation.bandit == bandit
         assert isinstance(simulation._rng, Generator)
 
-    def test_init_with_empty_armset_raises_error(self, agents):
-        empty_armset = ArmSet(arms=[])
+    def test_init_with_empty_bandit_raises_error(self, agents):
+        empty_bandit = Bandit(arms=[])
         with pytest.raises(ValueError):
-            Simulation(agents=agents, armset=empty_armset)
+            Simulation(agents=agents, bandit=empty_bandit)
 
     def test_run_returns_sim_stats_with_agent_stats(
-        self, mocker, agents, armset, simulation, run_params
+        self, mocker, agents, bandit, simulation, run_params
     ):
         mocker.patch.object(
             simulation,
             "_run_trials_for_agent",
-            lambda b, _, steps, metrics: AgentStats(b, armset, steps, metrics),
+            lambda b, _, steps, metrics: AgentStats(b, bandit, steps, metrics),
         )
         run_trials_for_agent_spy = mocker.spy(simulation, "_run_trials_for_agent")
         sim_stats = simulation.run(**run_params)
@@ -84,15 +84,15 @@ class TestSimulation:
         assert prime_spy.call_count == run_params["trials"]
 
     def test__run_trials_for_agent_chooses_plays_updates_each_step(
-        self, mocker, agent, armset, simulation, run_params
+        self, mocker, agent, bandit, simulation, run_params
     ):
         agent_choose_spy = mocker.spy(agent, "choose")
-        armset_play_spy = mocker.spy(armset, "play")
+        bandit_play_spy = mocker.spy(bandit, "play")
         agent_update_spy = mocker.spy(agent, "update")
         agent_stats_update_spy = mocker.spy(AgentStats, "update")
         simulation._run_trials_for_agent(agent, **run_params)
         total_count = run_params["trials"] * run_params["steps"]
         assert agent_choose_spy.call_count == total_count
-        assert armset_play_spy.call_count == total_count
+        assert bandit_play_spy.call_count == total_count
         assert agent_update_spy.call_count == total_count
         assert agent_stats_update_spy.call_count == total_count
