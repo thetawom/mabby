@@ -5,6 +5,7 @@ from numpy.random import Generator
 
 from mabby import Simulation
 from mabby.bandit import Bandit
+from mabby.exceptions import SimulationUsageError
 from mabby.stats import AgentStats, SimulationStats
 
 
@@ -26,6 +27,11 @@ def agents(num_agents, agent_factory):
 @pytest.fixture
 def agent(agents):
     return random.choice(agents)
+
+
+@pytest.fixture
+def strategies(num_agents, strategy_factory):
+    return [strategy_factory.generic() for _ in range(num_agents)]
 
 
 @pytest.fixture
@@ -54,6 +60,30 @@ class TestSimulation:
         empty_bandit = Bandit(arms=[])
         with pytest.raises(ValueError):
             Simulation(agents=agents, bandit=empty_bandit)
+
+    def test_init_with_no_agents_or_strategies_raises_error(self, bandit):
+        with pytest.raises(SimulationUsageError):
+            Simulation(bandit=bandit)
+
+    def test_init_with_empty_agents_raises_error(self, bandit):
+        with pytest.raises(ValueError):
+            Simulation(bandit=bandit, agents=[])
+
+    def test_init_with_strategies_sets_agents(self, bandit, strategies):
+        simulation = Simulation(bandit=bandit, strategies=strategies)
+        assert len(simulation.agents) == len(strategies)
+        for i, agent in enumerate(simulation.agents):
+            assert agent.strategy == strategies[i]
+
+    @pytest.mark.parametrize("names", [["a", "b", "c"], [], ["a", "b", "c", "d", "e"]])
+    def test_init_with_strategies_and_names_sets_agents(
+        self, bandit, strategies, names
+    ):
+        simulation = Simulation(bandit=bandit, strategies=strategies, names=names)
+        assert len(simulation.agents) == len(strategies)
+        for i, agent in enumerate(simulation.agents):
+            assert agent.strategy == strategies[i]
+            assert i >= len(names) or agent._name == names[i]
 
     def test_run_returns_sim_stats_with_agent_stats(
         self, mocker, agents, bandit, simulation, run_params

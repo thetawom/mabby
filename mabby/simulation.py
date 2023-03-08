@@ -1,26 +1,54 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from itertools import zip_longest
 from typing import TYPE_CHECKING
 
 import numpy as np
 
 from mabby.agents import Agent
+from mabby.exceptions import SimulationUsageError
 from mabby.stats import AgentStats, Metric, SimulationStats
 
 if TYPE_CHECKING:
     from mabby.bandit import Bandit
+    from mabby.strategies import Strategy
 
 
 class Simulation:
     def __init__(
-        self, agents: Iterable[Agent], bandit: Bandit, seed: int | None = None
+        self,
+        bandit: Bandit,
+        agents: Iterable[Agent] | None = None,
+        strategies: Iterable[Strategy] | None = None,
+        names: Iterable[str] | None = None,
+        seed: int | None = None,
     ):
-        self.agents = agents
-        if len(bandit) == 0:
-            raise ValueError("Bandit cannot be empty")
+        self.agents = self._create_agents(agents, strategies, names)
+        if len(list(self.agents)) == 0:
+            raise ValueError("no strategies or agents were supplied")
         self.bandit = bandit
+        if len(self.bandit) == 0:
+            raise ValueError("bandit cannot be empty")
         self._rng = np.random.default_rng(seed)
+
+    @staticmethod
+    def _create_agents(
+        agents: Iterable[Agent] | None = None,
+        strategies: Iterable[Strategy] | None = None,
+        names: Iterable[str] | None = None,
+    ) -> Iterable[Agent]:
+        if agents is not None:
+            return agents
+        if strategies is not None and names is not None:
+            return [
+                strategy.agent(name=name)
+                for strategy, name in zip_longest(strategies, names)
+                if strategy
+            ]
+        if strategies is not None:
+            return [strategy.agent() for strategy in strategies]
+        raise SimulationUsageError("one of agents or strategies must be supplied")
 
     def run(
         self, trials: int, steps: int, metrics: Iterable[Metric] | None = None
