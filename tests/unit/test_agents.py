@@ -3,20 +3,8 @@ from unittest.mock import patch
 import pytest
 from numpy.random import Generator
 
-from mabby.agents import (
-    Agent,
-    BetaTSAgent,
-    EpsilonGreedyAgent,
-    RandomAgent,
-    UCB1Agent,
-)
+from mabby.agents import Agent
 from mabby.exceptions import AgentUsageError
-from mabby.strategies import (
-    BetaTSStrategy,
-    EpsilonGreedyStrategy,
-    RandomStrategy,
-    UCB1Strategy,
-)
 
 
 class TestAgent:
@@ -41,7 +29,6 @@ class TestAgent:
 
     @pytest.fixture
     def mock_rng(self, mocker):
-        # return np.random.default_rng(seed=1234)
         return mocker.Mock(spec=Generator)
 
     @pytest.fixture
@@ -123,52 +110,3 @@ class TestAgent:
     def test_update_before_choose_raises_error(self, primed_agent, reward):
         with pytest.raises(AgentUsageError):
             primed_agent.update(reward=reward)
-
-
-class TestRandomAgent(TestAgent):
-    AGENT_CLASS = RandomAgent
-
-    @pytest.fixture(params=[{}, {"name": "agent-name"}])
-    def valid_params(self, request):
-        return request.param
-
-    def test_init_sets_random_strategy(self, agent):
-        assert isinstance(agent.strategy, RandomStrategy)
-
-
-class TestEpsilonGreedyAgent(TestAgent):
-    AGENT_CLASS = EpsilonGreedyAgent
-
-    @pytest.fixture(params=[{"eps": 0.2}, {"eps": 0.5, "name": "agent-name"}])
-    def valid_params(self, request):
-        return request.param
-
-    def test_init_sets_epsilon_greedy_strategy(self, agent, valid_params):
-        assert isinstance(agent.strategy, EpsilonGreedyStrategy)
-        assert agent.strategy.eps == valid_params["eps"]
-
-
-class TestUCB1Agent(TestAgent):
-    AGENT_CLASS = UCB1Agent
-
-    @pytest.fixture(params=[{"alpha": 2}, {"alpha": 0.5, "name": "agent-name"}])
-    def valid_params(self, request):
-        return request.param
-
-    def test_init_sets_ucb1_strategy(self, agent, valid_params):
-        assert isinstance(agent.strategy, UCB1Strategy)
-        assert agent.strategy.alpha == valid_params["alpha"]
-
-
-class TestBetaTSAgent(TestAgent):
-    AGENT_CLASS = BetaTSAgent
-
-    @pytest.fixture(
-        params=[{"general": False}, {"general": True, "name": "agent-name"}]
-    )
-    def valid_params(self, request):
-        return request.param
-
-    def test_init_sets_beta_ts_strategy(self, agent, valid_params):
-        assert isinstance(agent.strategy, BetaTSStrategy)
-        assert agent.strategy.general == valid_params["general"]

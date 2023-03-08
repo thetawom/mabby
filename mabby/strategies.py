@@ -6,7 +6,8 @@ import numpy as np
 from numpy.random import Generator
 from numpy.typing import NDArray
 
-from mabby.exceptions import AgentUsageError
+from mabby.agents import Agent
+from mabby.exceptions import StrategyUsageError
 
 
 class Strategy(ABC):
@@ -35,6 +36,9 @@ class Strategy(ABC):
     def Ns(self) -> NDArray[np.uint32]:
         """Count number of plays for each arm"""
 
+    def agent(self, **kwargs: str) -> Agent:
+        return Agent(strategy=self, **kwargs)
+
 
 class SemiUniformStrategy(Strategy, ABC):
     _Qs: NDArray[np.float64]
@@ -49,7 +53,7 @@ class SemiUniformStrategy(Strategy, ABC):
 
     def choose(self, rng: Generator | None = None) -> int:
         if rng is None:
-            raise AgentUsageError("semi-uniform strategies require rng")
+            raise StrategyUsageError("semi-uniform strategies require rng")
         if rng.random() < self.effective_eps():
             return self._explore(rng=rng)
         return self._exploit()
@@ -157,19 +161,19 @@ class BetaTSStrategy(Strategy):
 
     def choose(self, rng: Generator | None = None) -> int:
         if rng is None:
-            raise AgentUsageError("TS strategies require rng")
+            raise StrategyUsageError("TS strategies require rng")
         samples = rng.beta(a=self._a, b=self._b)
         return int(np.argmax(samples))
 
     def update(self, choice: int, reward: float, rng: Generator | None = None) -> None:
         if rng is None:
-            raise AgentUsageError("TS strategies require rng")
+            raise StrategyUsageError("TS strategies require rng")
         if self.general and (reward > 1 or reward < 0):
-            raise AgentUsageError(
+            raise StrategyUsageError(
                 "general Beta TS agents can only be used with rewards from 0 to 1"
             )
         if not self.general and reward != 0 and reward != 1:
-            raise AgentUsageError(
+            raise StrategyUsageError(
                 "Beta TS agents can only be used with Bernoulli rewards"
             )
         pseudo_reward = rng.binomial(n=1, p=reward) if self.general else reward

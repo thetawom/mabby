@@ -2,7 +2,8 @@ import numpy as np
 import pytest
 from numpy.random import Generator
 
-from mabby.exceptions import AgentUsageError
+from mabby.agents import Agent
+from mabby.exceptions import StrategyUsageError
 from mabby.strategies import (
     BetaTSStrategy,
     EpsilonGreedyStrategy,
@@ -52,6 +53,15 @@ class TestStrategy:
     def test_init_raises_error_with_invalid_params(self, invalid_params):
         with pytest.raises(ValueError):
             self.STRATEGY_CLASS(**invalid_params)
+
+    def test_agent_returns_agent(self, strategy):
+        agent = strategy.agent()
+        assert isinstance(agent, Agent)
+
+    @pytest.mark.parametrize("name", ["agent-name"])
+    def test_agent_with_name_returns_agent_with_name(self, strategy, name):
+        agent = strategy.agent(name=name)
+        assert agent._name == name
 
 
 class TestSemiUniformStrategy(TestStrategy):
@@ -103,7 +113,7 @@ class TestSemiUniformStrategy(TestStrategy):
         exploit.assert_called_once_with()
 
     def test_choose_without_rng_raises_error(self, primed_strategy):
-        with pytest.raises(AgentUsageError):
+        with pytest.raises(StrategyUsageError):
             primed_strategy.choose()
 
     def test_explore_follows_uniform_distribution(self):
@@ -284,7 +294,7 @@ class TestBetaTSStrategy(TestStrategy):
         assert beta_spy.spy_return[choice] == max(beta_spy.spy_return)
 
     def test_choose_without_rng_raises_error(self, primed_strategy):
-        with pytest.raises(AgentUsageError):
+        with pytest.raises(StrategyUsageError):
             primed_strategy.choose()
 
     def test_update_increments_a_when_reward_is_1(
@@ -312,7 +322,7 @@ class TestBetaTSStrategy(TestStrategy):
         mock_rng = mocker.Mock(spec=Generator)
         strategy = self.STRATEGY_CLASS(general=True)
         strategy.prime(**prime_params)
-        with pytest.raises(AgentUsageError):
+        with pytest.raises(StrategyUsageError):
             strategy.update(choice, invalid_reward, mock_rng)
 
     @pytest.mark.parametrize("invalid_reward", [-2, 0.4, 1.2])
@@ -322,11 +332,11 @@ class TestBetaTSStrategy(TestStrategy):
         mock_rng = mocker.Mock(spec=Generator)
         strategy = self.STRATEGY_CLASS(general=False)
         strategy.prime(**prime_params)
-        with pytest.raises(AgentUsageError):
+        with pytest.raises(StrategyUsageError):
             strategy.update(choice, invalid_reward, mock_rng)
 
     def test_update_without_rng_raises_error(self, primed_strategy, choice, reward):
-        with pytest.raises(AgentUsageError):
+        with pytest.raises(StrategyUsageError):
             primed_strategy.update(choice, reward)
 
     def test_Qs_returns_beta_mean(self, primed_strategy, a_b):
