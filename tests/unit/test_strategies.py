@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 from numpy.random import Generator
 
-from mabby.exceptions import BanditUsageError
+from mabby.exceptions import AgentUsageError
 from mabby.strategies import (
     BetaTSStrategy,
     EpsilonGreedyStrategy,
@@ -103,7 +103,7 @@ class TestSemiUniformStrategy(TestStrategy):
         exploit.assert_called_once_with()
 
     def test_choose_without_rng_raises_error(self, primed_strategy):
-        with pytest.raises(BanditUsageError):
+        with pytest.raises(AgentUsageError):
             primed_strategy.choose()
 
     def test_explore_follows_uniform_distribution(self):
@@ -284,7 +284,7 @@ class TestBetaTSStrategy(TestStrategy):
         assert beta_spy.spy_return[choice] == max(beta_spy.spy_return)
 
     def test_choose_without_rng_raises_error(self, primed_strategy):
-        with pytest.raises(BanditUsageError):
+        with pytest.raises(AgentUsageError):
             primed_strategy.choose()
 
     def test_update_increments_a_when_reward_is_1(
@@ -312,7 +312,7 @@ class TestBetaTSStrategy(TestStrategy):
         mock_rng = mocker.Mock(spec=Generator)
         strategy = self.STRATEGY_CLASS(general=True)
         strategy.prime(**prime_params)
-        with pytest.raises(BanditUsageError):
+        with pytest.raises(AgentUsageError):
             strategy.update(choice, invalid_reward, mock_rng)
 
     @pytest.mark.parametrize("invalid_reward", [-2, 0.4, 1.2])
@@ -322,11 +322,11 @@ class TestBetaTSStrategy(TestStrategy):
         mock_rng = mocker.Mock(spec=Generator)
         strategy = self.STRATEGY_CLASS(general=False)
         strategy.prime(**prime_params)
-        with pytest.raises(BanditUsageError):
+        with pytest.raises(AgentUsageError):
             strategy.update(choice, invalid_reward, mock_rng)
 
     def test_update_without_rng_raises_error(self, primed_strategy, choice, reward):
-        with pytest.raises(BanditUsageError):
+        with pytest.raises(AgentUsageError):
             primed_strategy.update(choice, reward)
 
     def test_Qs_returns_beta_mean(self, primed_strategy, a_b):

@@ -1,10 +1,10 @@
 import mabby as mb
 
-eps_greedy_bandit = mb.EpsilonGreedyBandit(eps=0.2)
-ucb_bandit = mb.UCB1Bandit(alpha=0.5)
-ts_bandit = mb.BetaTSBandit(general=True)
+eps_greedy_agent = mb.EpsilonGreedyAgent(eps=0.2)
+ucb_agent = mb.UCB1Agent(alpha=0.5)
+ts_agent = mb.BetaTSAgent(general=True)
 sim = mb.Simulation(
-    bandits=[eps_greedy_bandit, ucb_bandit, ts_bandit],
+    agents=[eps_greedy_agent, ucb_agent, ts_agent],
     armset=mb.BernoulliArm.armset(p=[0.5, 0.6, 0.7, 0.8]),
 )
 stats = sim.run(trials=100, steps=300)
