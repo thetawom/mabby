@@ -20,7 +20,7 @@
 
 ## Example Usage
 
-Below is an example of a simple simulation comparing two epsilon-greedy bandits with different exploration parameters.
+Below is an example of a four-armed Bernoulli bandit simulation using epsilon-greedy, UCB1, and Thompson sampling strategies.
 
 ```python
 import mabby as mb
@@ -29,7 +29,7 @@ eps_greedy_bandit = mb.EpsilonGreedyAgent(eps=0.2)
 ucb_bandit = mb.UCB1Agent(alpha=0.5)
 ts_bandit = mb.BetaTSAgent(general=True)
 sim = mb.Simulation(
-    bandits=[eps_greedy_bandit, ucb_bandit, ts_bandit],
+    agents=[eps_greedy_bandit, ucb_bandit, ts_bandit],
     bandit=mb.BernoulliArm.bandit(p=[0.5, 0.6, 0.7, 0.8]),
 )
 stats = sim.run(trials=100, steps=300)
