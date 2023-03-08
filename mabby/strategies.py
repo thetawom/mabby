@@ -22,7 +22,7 @@ class Strategy(ABC):
         """Choose an arm to play"""
 
     @abstractmethod
-    def update(self, choice: int, reward: float) -> None:
+    def update(self, choice: int, reward: float, rng: Generator | None = None) -> None:
         """Update estimates based on reward observation"""
 
     @property
@@ -32,24 +32,24 @@ class Strategy(ABC):
 
     @property
     @abstractmethod
-    def Ns(self) -> NDArray[np.int32]:
+    def Ns(self) -> NDArray[np.uint32]:
         """Count number of plays for each arm"""
 
 
 class SemiUniformStrategy(Strategy, ABC):
     _Qs: NDArray[np.float64]
-    _Ns: NDArray[np.int32]
+    _Ns: NDArray[np.uint32]
 
     def __init__(self, **kwargs: float) -> None:
         super().__init__()
 
     def prime(self, k: int, steps: int) -> None:
         self._Qs = np.zeros(k, dtype=np.float64)
-        self._Ns = np.zeros(k, dtype=np.int32)
+        self._Ns = np.zeros(k, dtype=np.uint32)
 
     def choose(self, rng: Generator | None = None) -> int:
         if rng is None:
-            raise BanditUsageError("semi-uniform bandits require rng")
+            raise BanditUsageError("semi-uniform strategies require rng")
         if rng.random() < self.effective_eps():
             return self._explore(rng=rng)
         return self._exploit()
@@ -60,7 +60,7 @@ class SemiUniformStrategy(Strategy, ABC):
     def _exploit(self) -> int:
         return int(np.argmax(self._Qs))
 
-    def update(self, choice: int, reward: float) -> None:
+    def update(self, choice: int, reward: float, rng: Generator | None = None) -> None:
         self._Ns[choice] += 1
         self._Qs[choice] += (reward - self._Qs[choice]) / self._Ns[choice]
 
@@ -69,7 +69,7 @@ class SemiUniformStrategy(Strategy, ABC):
         return self._Qs
 
     @property
-    def Ns(self) -> NDArray[np.int32]:
+    def Ns(self) -> NDArray[np.uint32]:
         return self._Ns
 
     @abstractmethod
@@ -93,7 +93,7 @@ class EpsilonGreedyStrategy(SemiUniformStrategy):
         self.eps = eps
 
     def __repr__(self) -> str:
-        return f"epsilon-greedy (eps={self.eps})"
+        return f"eps-greedy (eps={self.eps})"
 
     def effective_eps(self) -> float:
         return self.eps
@@ -102,7 +102,7 @@ class EpsilonGreedyStrategy(SemiUniformStrategy):
 class UCB1Strategy(Strategy):
     _t: int
     _Qs: NDArray[np.float64]
-    _Ns: NDArray[np.int32]
+    _Ns: NDArray[np.uint32]
 
     def __init__(self, alpha: float) -> None:
         super().__init__()
@@ -111,12 +111,12 @@ class UCB1Strategy(Strategy):
         self.alpha = alpha
 
     def __repr__(self) -> str:
-        return f"ucb-1 (alpha={self.alpha})"
+        return f"ucb1 (alpha={self.alpha})"
 
     def prime(self, k: int, steps: int) -> None:
         self._t = 0
         self._Qs = np.zeros(k, dtype=np.float64)
-        self._Ns = np.zeros(k, dtype=np.int32)
+        self._Ns = np.zeros(k, dtype=np.uint32)
 
     def choose(self, rng: Generator | None = None) -> int:
         if self._t < len(self._Ns):
@@ -126,7 +126,7 @@ class UCB1Strategy(Strategy):
     def _compute_UCBs(self) -> NDArray[np.float64]:
         return self._Qs + self.alpha * np.sqrt(np.log(self._t) / self._Ns)
 
-    def update(self, choice: int, reward: float) -> None:
+    def update(self, choice: int, reward: float, rng: Generator | None = None) -> None:
         self._t += 1
         self._Ns[choice] += 1
         self._Qs[choice] += (reward - self._Qs[choice]) / self._Ns[choice]
@@ -136,5 +136,50 @@ class UCB1Strategy(Strategy):
         return self._Qs
 
     @property
-    def Ns(self) -> NDArray[np.int32]:
+    def Ns(self) -> NDArray[np.uint32]:
         return self._Ns
+
+
+class BetaTSStrategy(Strategy):
+    _a: NDArray[np.uint32]
+    _b: NDArray[np.uint32]
+
+    def __init__(self, general: bool = False):
+        super().__init__()
+        self.general = general
+
+    def __repr__(self) -> str:
+        return f"{'generalized ' if self.general else ''}beta ts"
+
+    def prime(self, k: int, steps: int) -> None:
+        self._a = np.ones(k, dtype=np.uint32)
+        self._b = np.ones(k, dtype=np.uint32)
+
+    def choose(self, rng: Generator | None = None) -> int:
+        if rng is None:
+            raise BanditUsageError("TS strategies require rng")
+        samples = rng.beta(a=self._a, b=self._b)
+        return int(np.argmax(samples))
+
+    def update(self, choice: int, reward: float, rng: Generator | None = None) -> None:
+        if rng is None:
+            raise BanditUsageError("TS strategies require rng")
+        if self.general and (reward > 1 or reward < 0):
+            raise BanditUsageError(
+                "general Beta TS bandits can only be used with rewards from 0 to 1"
+            )
+        if not self.general and reward != 0 and reward != 1:
+            raise BanditUsageError(
+                "Beta TS bandits can only be used with Bernoulli rewards"
+            )
+        pseudo_reward = rng.binomial(n=1, p=reward) if self.general else reward
+        self._a[choice] += pseudo_reward
+        self._b[choice] += 1 - pseudo_reward
+
+    @property
+    def Qs(self) -> NDArray[np.float64]:
+        return self._a / (self._a + self._b)
+
+    @property
+    def Ns(self) -> NDArray[np.uint32]:
+        return ((self._a + self._b).astype(np.int64) - 2).astype(np.uint32)
