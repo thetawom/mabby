@@ -6,7 +6,7 @@ import pytest
 
 from mabby import ArmSet, Simulation
 from mabby.exceptions import StatsUsageError
-from mabby.stats import BanditStats, Metric, SimulationStats
+from mabby.stats import AgentStats, Metric, SimulationStats
 
 BASE_METRICS = [Metric.REGRET, Metric.REWARDS, Metric.OPTIMALITY]
 NON_BASE_METRICS = [Metric.CUM_REGRET, Metric.CUM_REWARDS]
@@ -73,10 +73,10 @@ class TestMetric:
             assert transformed_values == return_values
 
 
-class TestBanditStats:
+class TestAgentStats:
     @pytest.fixture
-    def bandit(self, bandit_factory):
-        return bandit_factory.generic()
+    def agent(self, agent_factory):
+        return agent_factory.generic()
 
     @pytest.fixture
     def armset(self, arm_factory, num_arms):
@@ -112,24 +112,22 @@ class TestBanditStats:
         return request.param
 
     @pytest.fixture
-    def bandit_stats(self, bandit, armset, steps):
-        return BanditStats(bandit=bandit, armset=armset, steps=steps)
+    def agent_stats(self, agent, armset, steps):
+        return AgentStats(agent=agent, armset=armset, steps=steps)
 
-    def test_init_sets_bandit_armset_and_steps(
-        self, bandit_stats, bandit, armset, steps
-    ):
-        assert bandit_stats.bandit == bandit
-        assert bandit_stats._armset == armset
-        assert bandit_stats._steps == steps
+    def test_init_sets_agent_armset_and_steps(self, agent_stats, agent, armset, steps):
+        assert agent_stats.agent == agent
+        assert agent_stats._armset == armset
+        assert agent_stats._steps == steps
 
     def test_init_with_no_metrics_creates_correct_stats_dictionary(
-        self, mocker, bandit, armset, steps
+        self, mocker, agent, armset, steps
     ):
         map_to_base_spy = mocker.spy(Metric, "map_to_base")
-        bandit_stats = BanditStats(bandit=bandit, armset=armset, steps=steps)
+        agent_stats = AgentStats(agent=agent, armset=armset, steps=steps)
         map_to_base_spy.assert_called_once_with(list(Metric))
-        assert set(bandit_stats._stats.keys()) == set(BASE_METRICS)
-        for stat_values in bandit_stats._stats.values():
+        assert set(agent_stats._stats.keys()) == set(BASE_METRICS)
+        for stat_values in agent_stats._stats.values():
             assert len(stat_values) == steps
 
     @pytest.mark.parametrize(
@@ -137,85 +135,85 @@ class TestBanditStats:
         [([Metric.REGRET, Metric.CUM_REWARDS], [Metric.REGRET, Metric.REWARDS])],
     )
     def test_init_with_metrics_creates_correct_stats_dictionary(
-        self, mocker, bandit, armset, steps, metrics, base_metrics
+        self, mocker, agent, armset, steps, metrics, base_metrics
     ):
         map_to_base_spy = mocker.spy(Metric, "map_to_base")
-        bandit_stats = BanditStats(
-            bandit=bandit, armset=armset, steps=steps, metrics=metrics
+        agent_stats = AgentStats(
+            agent=agent, armset=armset, steps=steps, metrics=metrics
         )
         map_to_base_spy.assert_called_once_with(metrics)
-        assert set(bandit_stats._stats.keys()) == set(base_metrics)
-        for stat_values in bandit_stats._stats.values():
+        assert set(agent_stats._stats.keys()) == set(base_metrics)
+        for stat_values in agent_stats._stats.values():
             assert len(stat_values) == steps
 
-    def test_len_returns_number_of_steps(self, bandit_stats, steps):
-        assert len(bandit_stats) == steps
+    def test_len_returns_number_of_steps(self, agent_stats, steps):
+        assert len(agent_stats) == steps
 
     @pytest.mark.parametrize("counts", [3])
     def test_getitem_returns_transformed_average(
-        self, mocker, bandit_stats, metric, counts
+        self, mocker, agent_stats, metric, counts
     ):
-        mocker.patch.object(bandit_stats, "_counts", counts)
+        mocker.patch.object(agent_stats, "_counts", counts)
         transform_spy = mocker.spy(metric, "transform")
-        stats = bandit_stats[metric]
+        stats = agent_stats[metric]
         transform_spy.assert_called_once()
         assert (stats == transform_spy.spy_return).all()
 
-    def test_update_increments_count_for_step(self, bandit_stats, step, choice, reward):
-        original_count = bandit_stats._counts[step]
-        bandit_stats.update(step=step, choice=choice, reward=reward)
-        assert bandit_stats._counts[step] == original_count + 1
+    def test_update_increments_count_for_step(self, agent_stats, step, choice, reward):
+        original_count = agent_stats._counts[step]
+        agent_stats.update(step=step, choice=choice, reward=reward)
+        assert agent_stats._counts[step] == original_count + 1
 
     @pytest.mark.parametrize("metrics", [[Metric.CUM_REGRET], [Metric.REGRET]])
     def test_update_keeps_regret_when_optimal(
-        self, bandit, armset, metrics, steps, step, opt_choice, reward
+        self, agent, armset, metrics, steps, step, opt_choice, reward
     ):
-        bandit_stats = BanditStats(bandit, armset, steps, metrics)
-        prev_regret = bandit_stats._stats[Metric.REGRET][step]
-        bandit_stats.update(step=step, choice=opt_choice, reward=reward)
-        assert bandit_stats._stats[Metric.REGRET][step] == prev_regret
+        agent_stats = AgentStats(agent, armset, steps, metrics)
+        prev_regret = agent_stats._stats[Metric.REGRET][step]
+        agent_stats.update(step=step, choice=opt_choice, reward=reward)
+        assert agent_stats._stats[Metric.REGRET][step] == prev_regret
 
     @pytest.mark.parametrize("metrics", [[Metric.CUM_REGRET], [Metric.REGRET]])
     def test_update_updates_regret_when_not_optimal(
-        self, mocker, bandit, armset, metrics, steps, step, non_opt_choice, reward
+        self, mocker, agent, armset, metrics, steps, step, non_opt_choice, reward
     ):
         regret_spy = mocker.spy(armset, "regret")
-        bandit_stats = BanditStats(bandit, armset, steps, metrics)
-        prev_regret = bandit_stats._stats[Metric.REGRET][step]
-        bandit_stats.update(step=step, choice=non_opt_choice, reward=reward)
+        agent_stats = AgentStats(agent, armset, steps, metrics)
+        prev_regret = agent_stats._stats[Metric.REGRET][step]
+        agent_stats.update(step=step, choice=non_opt_choice, reward=reward)
         assert (
-            bandit_stats._stats[Metric.REGRET][step]
+            agent_stats._stats[Metric.REGRET][step]
             == prev_regret + regret_spy.spy_return
         )
 
     @pytest.mark.parametrize("metrics", [[Metric.OPTIMALITY]])
     def test_update_increments_optimality_when_optimal(
-        self, bandit, armset, metrics, steps, step, opt_choice, reward
+        self, agent, armset, metrics, steps, step, opt_choice, reward
     ):
-        bandit_stats = BanditStats(bandit, armset, steps, metrics)
-        prev_optimality = bandit_stats._stats[Metric.OPTIMALITY][step]
-        bandit_stats.update(step=step, choice=opt_choice, reward=reward)
-        assert bandit_stats._stats[Metric.OPTIMALITY][step] == prev_optimality + 1
+        agent_stats = AgentStats(agent, armset, steps, metrics)
+        prev_optimality = agent_stats._stats[Metric.OPTIMALITY][step]
+        agent_stats.update(step=step, choice=opt_choice, reward=reward)
+        assert agent_stats._stats[Metric.OPTIMALITY][step] == prev_optimality + 1
 
     @pytest.mark.parametrize("metrics", [[Metric.OPTIMALITY]])
     def test_update_keeps_optimality_when_not_optimal(
-        self, bandit, armset, metrics, steps, step, non_opt_choice, reward
+        self, agent, armset, metrics, steps, step, non_opt_choice, reward
     ):
-        bandit_stats = BanditStats(bandit, armset, steps, metrics)
-        prev_optimality = bandit_stats._stats[Metric.OPTIMALITY][step]
-        bandit_stats.update(step=step, choice=non_opt_choice, reward=reward)
+        agent_stats = AgentStats(agent, armset, steps, metrics)
+        prev_optimality = agent_stats._stats[Metric.OPTIMALITY][step]
+        agent_stats.update(step=step, choice=non_opt_choice, reward=reward)
         print("opt_choice", armset.best_arm())
         print("non_opt_choice", non_opt_choice)
-        assert bandit_stats._stats[Metric.OPTIMALITY][step] == prev_optimality
+        assert agent_stats._stats[Metric.OPTIMALITY][step] == prev_optimality
 
     @pytest.mark.parametrize("metrics", [[Metric.CUM_REWARDS], [Metric.REWARDS]])
     def test_update_updates_rewards(
-        self, bandit, armset, metrics, steps, step, choice, reward
+        self, agent, armset, metrics, steps, step, choice, reward
     ):
-        bandit_stats = BanditStats(bandit, armset, steps, metrics)
-        prev_rewards = bandit_stats._stats[Metric.REWARDS][step]
-        bandit_stats.update(step=step, choice=choice, reward=reward)
-        assert bandit_stats._stats[Metric.REWARDS][step] == prev_rewards + reward
+        agent_stats = AgentStats(agent, armset, steps, metrics)
+        prev_rewards = agent_stats._stats[Metric.REWARDS][step]
+        agent_stats.update(step=step, choice=choice, reward=reward)
+        assert agent_stats._stats[Metric.REWARDS][step] == prev_rewards + reward
 
 
 class TestSimulationStats:
@@ -224,12 +222,12 @@ class TestSimulationStats:
         mocker.patch("matplotlib.pyplot.show")
 
     @pytest.fixture(params=[3])
-    def bandits(self, request, bandit_factory):
-        return [bandit_factory.generic() for _ in range(request.param)]
+    def agents(self, request, agent_factory):
+        return [agent_factory.generic() for _ in range(request.param)]
 
     @pytest.fixture
-    def bandit(self, bandits):
-        return random.choice(bandits)
+    def agent(self, agents):
+        return random.choice(agents)
 
     @pytest.fixture(params=[3])
     def armset(self, request, arm_factory):
@@ -237,25 +235,25 @@ class TestSimulationStats:
         return ArmSet(arms=arms)
 
     @pytest.fixture
-    def simulation(self, bandits, armset):
-        return Simulation(bandits=bandits, armset=armset)
+    def simulation(self, agents, armset):
+        return Simulation(agents=agents, armset=armset)
 
     @pytest.fixture(params=[10])
     def steps(self, request):
         return request.param
 
     @pytest.fixture
-    def bandit_stats(self, bandit, armset, steps):
-        return BanditStats(bandit=bandit, armset=armset, steps=steps)
+    def agent_stats(self, agent, armset, steps):
+        return AgentStats(agent=agent, armset=armset, steps=steps)
 
     @pytest.fixture
     def sim_stats(self, simulation):
         return SimulationStats(simulation=simulation)
 
     @pytest.fixture
-    def filled_sim_stats(self, sim_stats, bandits, armset, steps):
-        for bandit in bandits:
-            sim_stats.add(BanditStats(bandit, armset, steps))
+    def filled_sim_stats(self, sim_stats, agents, armset, steps):
+        for agent in agents:
+            sim_stats.add(AgentStats(agent, armset, steps))
         return sim_stats
 
     @pytest.fixture
@@ -266,49 +264,47 @@ class TestSimulationStats:
         assert sim_stats._simulation == simulation
         assert isinstance(sim_stats._stats_dict, dict)
 
-    def test_add_puts_bandit_stats_in_stats_dict(self, sim_stats, bandit, bandit_stats):
-        sim_stats.add(bandit_stats)
-        assert sim_stats._stats_dict[bandit] == bandit_stats
+    def test_add_puts_agent_stats_in_stats_dict(self, sim_stats, agent, agent_stats):
+        sim_stats.add(agent_stats)
+        assert sim_stats._stats_dict[agent] == agent_stats
 
-    def test_getitem_returns_bandit_stats_of_bandit(
-        self, sim_stats, bandit, bandit_stats
-    ):
-        sim_stats._stats_dict[bandit] = bandit_stats
-        assert sim_stats[bandit] == bandit_stats
+    def test_getitem_returns_agent_stats_of_agent(self, sim_stats, agent, agent_stats):
+        sim_stats._stats_dict[agent] = agent_stats
+        assert sim_stats[agent] == agent_stats
 
-    def test_setitem_puts_bandit_stats_in_stats_dict(
-        self, sim_stats, bandit, bandit_stats
+    def test_setitem_puts_agent_stats_in_stats_dict(
+        self, sim_stats, agent, agent_stats
     ):
-        sim_stats[bandit] = bandit_stats
-        assert sim_stats._stats_dict[bandit] == bandit_stats
+        sim_stats[agent] = agent_stats
+        assert sim_stats._stats_dict[agent] == agent_stats
 
-    def test_setitem_raises_error_with_non_matching_bandit(
-        self, sim_stats, bandit, bandits, bandit_stats
+    def test_setitem_raises_error_with_non_matching_agent(
+        self, sim_stats, agent, agents, agent_stats
     ):
-        other_bandit = random.choice(list(filter(lambda b: b != bandit, bandits)))
+        other_agent = random.choice(list(filter(lambda b: b != agent, agents)))
         with pytest.raises(StatsUsageError):
-            sim_stats[other_bandit] = bandit_stats
+            sim_stats[other_agent] = agent_stats
 
-    def test_contains_returns_true_if_bandit_tracked(self, filled_sim_stats, bandits):
-        for bandit in bandits:
-            assert bandit in filled_sim_stats
+    def test_contains_returns_true_if_agent_tracked(self, filled_sim_stats, agents):
+        for agent in agents:
+            assert agent in filled_sim_stats
 
-    def test_contains_returns_false_if_bandit_not_tracked(
-        self, sim_stats, bandit_factory
+    def test_contains_returns_false_if_agent_not_tracked(
+        self, sim_stats, agent_factory
     ):
-        other_bandit = bandit_factory.generic()
-        assert other_bandit not in sim_stats
+        other_agent = agent_factory.generic()
+        assert other_agent not in sim_stats
 
     @patch("matplotlib.pyplot.plot")
-    def test_plot_plots_stats_for_each_bandit(
-        self, plot, filled_sim_stats, metric, bandits
+    def test_plot_plots_stats_for_each_agent(
+        self, plot, filled_sim_stats, metric, agents
     ):
         filled_sim_stats.plot(metric=metric)
         calls = plot.call_args_list
-        for i, bandit in enumerate(bandits):
-            bandit_stats = filled_sim_stats[bandit]
-            np.testing.assert_array_equal(bandit_stats[metric], calls[i][0][0])
-            assert calls[i][1]["label"] == str(bandit)
+        for i, agent in enumerate(agents):
+            agent_stats = filled_sim_stats[agent]
+            np.testing.assert_array_equal(agent_stats[metric], calls[i][0][0])
+            assert calls[i][1]["label"] == str(agent)
 
     def test_plot_regret_invokes_plot_when_cumulative_is_true(
         self, plot_spy, filled_sim_stats

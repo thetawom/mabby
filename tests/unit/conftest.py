@@ -5,7 +5,7 @@ import pytest
 from numpy.random import Generator
 from numpy.typing import NDArray
 
-from mabby import Bandit
+from mabby import Agent
 from mabby.arms import Arm
 from mabby.strategies import Strategy
 
@@ -54,14 +54,14 @@ def strategy_factory():
 
 
 @pytest.fixture
-def bandit_factory(strategy_factory):
-    class GenericBanditFactory:
+def agent_factory(strategy_factory):
+    class GenericAgentFactory:
         @staticmethod
         def generic():
             strategy = strategy_factory.generic()
-            return Bandit(strategy=strategy, name="Generic Bandit")
+            return Agent(strategy=strategy, name="Generic Agent")
 
-    return GenericBanditFactory
+    return GenericAgentFactory
 
 
 @pytest.fixture
