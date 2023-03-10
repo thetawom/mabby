@@ -7,8 +7,7 @@ import pytest
 from numpy.random import Generator
 from numpy.typing import NDArray
 
-from mabby import Agent
-from mabby.bandit import Arm
+from mabby import Agent, Arm
 from mabby.strategies import Strategy
 
 
@@ -21,7 +20,7 @@ class GenericStrategy(Strategy):
     def choose(self, rng: Generator) -> int:
         return 0
 
-    def update(self, choice: int, reward: float, rng: Generator) -> None:
+    def update(self, choice: int, reward: float, rng: Generator | None = None) -> None:
         pass
 
     @property

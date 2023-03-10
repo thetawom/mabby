@@ -6,7 +6,7 @@ import numpy as np
 from numpy.random import Generator
 from numpy.typing import NDArray
 
-from mabby.exceptions import AgentUsageError
+from mabby.simulation.exceptions import AgentUsageError
 
 if TYPE_CHECKING:
     from mabby.strategies import Strategy

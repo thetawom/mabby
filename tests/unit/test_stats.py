@@ -4,9 +4,9 @@ from unittest.mock import patch
 import numpy as np
 import pytest
 
-from mabby import Bandit, Simulation
+from mabby import Bandit, Metric, Simulation
 from mabby.exceptions import StatsUsageError
-from mabby.stats import AgentStats, Metric, SimulationStats
+from mabby.simulation.stats import AgentStats, SimulationStats
 
 BASE_METRICS = [Metric.REGRET, Metric.REWARDS, Metric.OPTIMALITY]
 NON_BASE_METRICS = [Metric.CUM_REGRET, Metric.CUM_REWARDS]

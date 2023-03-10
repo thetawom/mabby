@@ -23,16 +23,18 @@
 Below is an example of a four-armed Bernoulli bandit simulation using epsilon-greedy, UCB1, and Thompson sampling strategies.
 
 ```python
-import mabby as mb
+from mabby import Simulation, BernoulliArm
+from mabby.strategies import EpsilonGreedyStrategy, UCB1Strategy, BetaTSStrategy
 
-eps_greedy_strategy = mb.EpsilonGreedyStrategy(eps=0.2)
-ucb1_strategy = mb.UCB1Strategy(alpha=0.5)
-beta_ts_strategy = mb.BetaTSStrategy(general=True)
-sim = mb.Simulation(
-    strategies=[eps_greedy_strategy, ucb1_strategy, beta_ts_strategy],
-    bandit=mb.BernoulliArm.bandit(p=[0.5, 0.6, 0.7, 0.8]),
+simulation = Simulation(
+    bandit=BernoulliArm.bandit(p=[0.5, 0.6, 0.7, 0.8]),
+    strategies=[
+        EpsilonGreedyStrategy(eps=0.2),
+        UCB1Strategy(alpha=0.5),
+        BetaTSStrategy(general=True),
+    ],
 )
-stats = sim.run(trials=100, steps=300)
+stats = simulation.run(trials=100, steps=300)
 
 stats.plot_regret(cumulative=True)
 stats.plot_optimality()

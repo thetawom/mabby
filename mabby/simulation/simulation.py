@@ -6,12 +6,12 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 
-from mabby.agents import Agent
-from mabby.exceptions import SimulationUsageError
-from mabby.stats import AgentStats, Metric, SimulationStats
+from mabby.simulation.agent import Agent
+from mabby.simulation.exceptions import SimulationUsageError
+from mabby.simulation.stats import AgentStats, Metric, SimulationStats
 
 if TYPE_CHECKING:
-    from mabby.bandit import Bandit
+    from mabby.simulation.bandit import Bandit
     from mabby.strategies import Strategy
 
 
