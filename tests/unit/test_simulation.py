@@ -3,8 +3,7 @@ import random
 import pytest
 from numpy.random import Generator
 
-from mabby import Simulation
-from mabby.bandit import Bandit
+from mabby import Bandit, Simulation
 from mabby.exceptions import SimulationUsageError
 from mabby.stats import AgentStats, SimulationStats
 

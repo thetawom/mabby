@@ -1,19 +1,12 @@
-class AgentUsageError(Exception):
-    """Raised when agent methods are used incorrectly"""
+from mabby.core.exceptions import AgentUsageError, SimulationUsageError
+from mabby.strategies.exceptions import StrategyUsageError
 
-    pass
-
-
-class StrategyUsageError(Exception):
-    """Raised when strategy methods are used incorrectly"""
-
-    pass
-
-
-class SimulationUsageError(Exception):
-    """Raised when simulation methods are used incorrectly"""
-
-    pass
+__all__ = [
+    "StrategyUsageError",
+    "AgentUsageError",
+    "SimulationUsageError",
+    "StatsUsageError",
+]
 
 
 class StatsUsageError(Exception):
