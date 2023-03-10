@@ -3,7 +3,7 @@ from unittest.mock import patch
 import pytest
 from numpy.random import Generator
 
-from mabby.agents import Agent
+from mabby import Agent
 from mabby.exceptions import AgentUsageError
 
 

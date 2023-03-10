@@ -1,8 +1,4 @@
-from mabby.agents import (
-    Agent,
-)
-from mabby.bandit import Bandit, BernoulliArm, GaussianArm
-from mabby.simulation import Simulation
+from mabby.core import Agent, Arm, Bandit, Simulation
 from mabby.stats import Metric
 from mabby.strategies import (
     BetaTSStrategy,
@@ -14,9 +10,8 @@ from mabby.strategies import (
 
 __all__ = [
     "Agent",
+    "Arm",
     "Bandit",
-    "BernoulliArm",
-    "GaussianArm",
     "Simulation",
     "Metric",
     "BetaTSStrategy",

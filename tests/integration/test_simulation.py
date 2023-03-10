@@ -2,12 +2,11 @@ import numpy as np
 import pytest
 
 from mabby import (
-    BernoulliArm,
     EpsilonGreedyStrategy,
-    GaussianArm,
     RandomStrategy,
     Simulation,
 )
+from mabby.arms import BernoulliArm, GaussianArm
 
 
 @pytest.mark.parametrize("p", [[0.7, 0.9]])
