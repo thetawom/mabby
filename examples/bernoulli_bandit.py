@@ -1,14 +1,15 @@
-from mabby import BetaTSStrategy, EpsilonGreedyStrategy, Simulation, UCB1Strategy
-from mabby.core import BernoulliArm
+from mabby import BernoulliArm, Simulation
+from mabby.strategies import BetaTSStrategy, EpsilonGreedyStrategy, UCB1Strategy
 
-eps_greedy_strategy = EpsilonGreedyStrategy(eps=0.2)
-ucb1_strategy = UCB1Strategy(alpha=0.5)
-beta_ts_strategy = BetaTSStrategy(general=True)
-sim = Simulation(
-    strategies=[eps_greedy_strategy, ucb1_strategy, beta_ts_strategy],
+simulation = Simulation(
     bandit=BernoulliArm.bandit(p=[0.5, 0.6, 0.7, 0.8]),
+    strategies=[
+        EpsilonGreedyStrategy(eps=0.2),
+        UCB1Strategy(alpha=0.5),
+        BetaTSStrategy(general=True),
+    ],
 )
-stats = sim.run(trials=100, steps=300)
+stats = simulation.run(trials=100, steps=300)
 
 stats.plot_regret(cumulative=True)
 stats.plot_optimality()

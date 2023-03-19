@@ -6,7 +6,7 @@ import numpy as np
 from numpy.random import Generator
 from numpy.typing import NDArray
 
-from mabby.core.agent import Agent
+from mabby.simulation.agent import Agent
 
 
 class Strategy(ABC):

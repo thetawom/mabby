@@ -1,4 +1,8 @@
-from mabby.core.exceptions import AgentUsageError, SimulationUsageError
+from mabby.simulation.exceptions import (
+    AgentUsageError,
+    SimulationUsageError,
+    StatsUsageError,
+)
 from mabby.strategies.exceptions import StrategyUsageError
 
 __all__ = [
@@ -7,9 +11,3 @@ __all__ = [
     "SimulationUsageError",
     "StatsUsageError",
 ]
-
-
-class StatsUsageError(Exception):
-    """Raised when stats methods are used incorrectly"""
-
-    pass

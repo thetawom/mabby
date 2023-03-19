@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 
 from numpy.random import Generator
 
-from mabby.core.bandit import Bandit
+from mabby.simulation.bandit import Bandit
 
 
 class Arm(ABC):

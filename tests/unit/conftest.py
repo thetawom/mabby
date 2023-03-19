@@ -7,7 +7,8 @@ import pytest
 from numpy.random import Generator
 from numpy.typing import NDArray
 
-from mabby import Agent, Arm, Strategy
+from mabby import Agent, Arm
+from mabby.strategies import Strategy
 
 
 class GenericStrategy(Strategy):

@@ -5,7 +5,7 @@ from numpy.random import Generator
 
 from mabby import Bandit, Simulation
 from mabby.exceptions import SimulationUsageError
-from mabby.stats import AgentStats, SimulationStats
+from mabby.simulation.stats import AgentStats, SimulationStats
 
 
 @pytest.fixture(params=[2])
