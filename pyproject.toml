@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mabby"
-version = "0.1.0"
+version = "0.1.1"
 description = "A multi-armed bandit (MAB) simulation library"
 authors = ["Ethan Wu <ew2664@columbia.edu>"]
 license = "Apache-2.0"
