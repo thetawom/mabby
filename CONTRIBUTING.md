@@ -30,7 +30,7 @@ Before contributing, make sure you have [poetry](https://python-poetry.org/) ins
 
    > Run `make coverage` to run unit tests only and generate an HTML coverage report.
 
-1. Commit your changes following our [commit conventions](#commit--pull-request-conventions).
+1. Commit your changes following our [commit conventions](#commit-conventions).
 
 1. Push your changes to your fork of the repository.
 
