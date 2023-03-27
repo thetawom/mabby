@@ -21,6 +21,8 @@
 
 ## Installation
 
+Prerequisites: Python 3.9+ and `pip`
+
 Install **mabby** with `pip`:
 
 ```bash
