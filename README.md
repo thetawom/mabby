@@ -29,6 +29,40 @@ Install **mabby** with `pip`:
 pip install mabby
 ```
 
+## Basic Usage
+
+First, configure the arms and rewards of the bandit problem to simulate. For example, the following creates a two-armed Bernoulli bandit.
+
+```python
+bandit = Bandit(arms=[BernoulliArm(p=0.3), BernoulliArm(p=0.6)])
+```
+
+If all arms of the bandit have rewards distributions of the same type, then the following shorthand can also be used.
+
+```python
+bandit = BernoulliArm.bandit(p=[0.3, 0.6])
+```
+
+Next, specify the bandit strategy to simulate by creating a `Strategy` with desired parameter values. For example, the following sets up an epsilon-greedy strategy with `eps=0.2`.
+
+```python
+strategy = EpsilonGreedyStrategy(eps=0.2)
+```
+
+Run a simulation with the bandit and bandit strategy for a specified number of trials and steps per trial. When creating the `Simulation`, multiple strategies can be specified to be run together for comparison.
+
+```python
+simulation = Simulation(bandit=bandit, strategies=[strategy])
+stats = simulation.run(trials=100, steps=300)
+```
+
+Running the simulation outputs a `SimulationStats` object that can be used to visualize the tracked metrics.
+
+```python
+stats.plot_regret(cumulative=True)
+stats.plot_optimality()
+```
+
 ## Examples
 
 - [**Bernoulli Bandits**](./examples/bernoulli_bandit.py): a four-armed Bernoulli bandit simulation comparing epsilon-greedy, UCB1, and Thompson sampling strategies
