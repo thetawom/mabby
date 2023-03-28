@@ -1,3 +1,5 @@
+"""Provides exceptions for mabby usage."""
+
 from mabby.simulation.exceptions import (
     AgentUsageError,
     SimulationUsageError,

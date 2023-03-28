@@ -43,6 +43,9 @@ class GenericArm(Arm):
     def mean(self) -> float:
         return self._mean
 
+    def __repr__(self) -> str:
+        return "generic-arm"
+
 
 @pytest.fixture
 def strategy_factory():

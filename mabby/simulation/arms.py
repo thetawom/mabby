@@ -1,3 +1,5 @@
+"""Provides ``Arm`` base class and different reward distribution implementations."""
+
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
@@ -8,21 +10,52 @@ from mabby.simulation.bandit import Bandit
 
 
 class Arm(ABC):
+    """Base class for a bandit arm implementing a reward distribution.
+
+    An arm represents one of the decision choices available to the agent in a bandit
+    problem. It has a hidden reward distribution and can be played by the agent to
+    generate observable rewards.
+    """
+
     @abstractmethod
     def __init__(self, **kwargs: float):
-        pass
+        """Initializes an arm."""
 
     @abstractmethod
     def play(self, rng: Generator) -> float:
-        """Play arm and sample reward from distribution"""
+        """Plays the arm and samples a reward.
+
+        Args:
+            rng: A random number generator.
+
+        Returns:
+            The sampled reward from the arm's reward distribution.
+        """
 
     @property
     @abstractmethod
     def mean(self) -> float:
-        """Compute mean of reward distribution"""
+        """Returns the mean reward of the arm.
+
+        Returns:
+            The computed mean of the arm's reward distribution.
+        """
+
+    @abstractmethod
+    def __repr__(self) -> str:
+        """Returns the string representation of the arm."""
 
     @classmethod
     def bandit(cls, **kwargs: list[float]) -> Bandit:
+        """Creates a bandit with arms of the same reward distribution type.
+
+        Keyword Args:
+            kwargs: A dictionary where keys are arm parameter names and values are lists
+                    of parameter values for each arm.
+
+        Returns:
+            A bandit with the specified arms.
+        """
         params_dicts = [dict(zip(kwargs, t)) for t in zip(*kwargs.values())]
         if len(params_dicts) == 0:
             raise ValueError("insufficient parameters to create an arm")
@@ -30,31 +63,74 @@ class Arm(ABC):
 
 
 class BernoulliArm(Arm):
+    """Bandit arm with a Bernoulli reward distribution."""
+
     def __init__(self, p: float):
-        self.p = p
+        """Initializes a Bernoulli arm.
+
+        Args:
+            p: Parameter of the Bernoulli distribution.
+        """
+        self.p: float = p  #: Parameter of the Bernoulli distribution
 
     def play(self, rng: Generator) -> int:
+        """Plays the arm and samples a reward.
+
+        Args:
+            rng: A random number generator.
+
+        Returns:
+            The sampled reward from the arm's reward distribution.
+        """
         return rng.binomial(1, self.p)
 
     @property
     def mean(self) -> float:
+        """Returns the mean reward of the arm.
+
+        Returns:
+            The computed mean of the arm's reward distribution.
+        """
         return self.p
 
     def __repr__(self) -> str:
+        """Returns the string representation of the arm."""
         return f"Bernoulli(p={self.p})"
 
 
 class GaussianArm(Arm):
+    """Bandit arm with a Gaussian reward distribution."""
+
     def __init__(self, loc: float, scale: float):
-        self.loc = loc
-        self.scale = scale
+        """Initializes a Gaussian arm.
+
+        Args:
+            loc: Mean ("center") of the Gaussian distribution.
+            scale: Standard deviation of the Gaussian distribution.
+        """
+        self.loc: float = loc  #: Mean ("center") of the Gaussian distribution
+        self.scale: float = scale  #: Standard deviation of the Gaussian distribution
 
     def play(self, rng: Generator) -> float:
+        """Plays the arm and samples a reward.
+
+        Args:
+            rng: A random number generator.
+
+        Returns:
+            The sampled reward from the arm's reward distribution.
+        """
         return rng.normal(self.loc, self.scale)
 
     @property
     def mean(self) -> float:
+        """Returns the mean reward of the arm.
+
+        Returns:
+            The computed mean of the arm's reward distribution.
+        """
         return self.loc
 
     def __repr__(self) -> str:
+        """Returns the string representation of the arm."""
         return f"Gaussian(loc={self.loc}, scale={self.scale})"
