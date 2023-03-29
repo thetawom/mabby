@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 class MetricMapping:
     """Transformation from a base metric.
 
-    See ``Metric`` enum for examples of metric mappings.
+    See :class:`Metric` for examples of metric mappings.
     """
 
     #: The base metric to transform from
@@ -81,7 +81,7 @@ class Metric(Enum):
 
     @property
     def base(self) -> Metric:
-        """Returns the base metric that the metric is transformed from.
+        """The base metric that the metric is transformed from.
 
         If the metric is already a base metric, the metric itself is returned.
         """
@@ -118,13 +118,13 @@ class Metric(Enum):
 
 
 class SimulationStats:
-    """Statistics for a multi-armed bandit sim."""
+    """Statistics for a multi-armed bandit simulation."""
 
     def __init__(self, simulation: Simulation):
-        """Initializes sim statistics.
+        """Initializes simulation statistics.
 
         Args:
-            simulation: The sim to track.
+            simulation: The simulation to track.
         """
         self._simulation: Simulation = simulation
         self._stats_dict: dict[Agent, AgentStats] = {}
@@ -168,7 +168,7 @@ class SimulationStats:
         return agent in self._stats_dict
 
     def plot(self, metric: Metric) -> None:
-        """Generates a plot for a sim metric.
+        """Generates a plot for a simulation metric.
 
         Args:
             metric: The metric to plot.
@@ -200,7 +200,7 @@ class SimulationStats:
 
 
 class AgentStats:
-    """Statistics for an agent in a multi-armed bandit sim."""
+    """Statistics for an agent in a multi-armed bandit simulation."""
 
     def __init__(
         self,
@@ -216,8 +216,8 @@ class AgentStats:
 
         Args:
             agent: The agent that statistics are tracked for
-            bandit: The bandit of the sim being run
-            steps: The number of steps per trial in the sim
+            bandit: The bandit of the simulation being run
+            steps: The number of steps per trial in the simulation
             metrics: A collection of metrics to track.
         """
         self.agent: Agent = agent  #: The agent that statistics are tracked for
@@ -248,7 +248,7 @@ class AgentStats:
         return metric.transform(values)
 
     def update(self, step: int, choice: int, reward: float) -> None:
-        """Updates metric values for the latest sim step.
+        """Updates metric values for the latest simulation step.
 
         Args:
             step: The number of the step.

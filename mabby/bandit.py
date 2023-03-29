@@ -1,4 +1,4 @@
-"""Provides ``Bandit`` class for running multi-armed bandit simulations."""
+"""Provides :class:`Bandit` class for running multi-armed bandit simulations."""
 
 from __future__ import annotations
 
@@ -70,7 +70,7 @@ class Bandit:
 
     @property
     def means(self) -> list[float]:
-        """Returns the means of the arms.
+        """The means of the arms.
 
         Returns:
             An array of the means of each arm.
