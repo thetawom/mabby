@@ -9,7 +9,7 @@ import numpy as np
 from numpy.random import Generator
 
 if TYPE_CHECKING:
-    from mabby.simulation.arms import Arm
+    from mabby.arms import Arm
 from mabby.utils import random_argmax
 
 

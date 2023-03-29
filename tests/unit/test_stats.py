@@ -6,7 +6,7 @@ import pytest
 
 from mabby import Bandit, Metric, Simulation
 from mabby.exceptions import StatsUsageError
-from mabby.simulation.stats import AgentStats, SimulationStats
+from mabby.stats import AgentStats, SimulationStats
 
 BASE_METRICS = [Metric.REGRET, Metric.REWARDS, Metric.OPTIMALITY]
 NON_BASE_METRICS = [Metric.CUM_REGRET, Metric.CUM_REWARDS]

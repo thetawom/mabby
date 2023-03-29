@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from mabby import Arm, Bandit
-from mabby.simulation.arms import BernoulliArm, GaussianArm
+from mabby.arms import BernoulliArm, GaussianArm
 
 
 @pytest.fixture()

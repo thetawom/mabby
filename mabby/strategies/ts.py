@@ -4,7 +4,7 @@ import numpy as np
 from numpy.random import Generator
 from numpy.typing import NDArray
 
-from mabby.strategies.exceptions import StrategyUsageError
+from mabby.exceptions import StrategyUsageError
 from mabby.strategies.strategy import Strategy
 from mabby.utils import random_argmax
 
