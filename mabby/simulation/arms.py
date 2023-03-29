@@ -46,10 +46,17 @@ class Arm(ABC):
         """Returns the string representation of the arm."""
 
     @classmethod
-    def bandit(cls, **kwargs: list[float]) -> Bandit:
+    def bandit(
+        cls,
+        rng: Generator | None = None,
+        seed: int | None = None,
+        **kwargs: list[float],
+    ) -> Bandit:
         """Creates a bandit with arms of the same reward distribution type.
 
         Keyword Args:
+            rng: A random number generator.
+            seed: A seed for random number generation if ``rng`` is not provided.
             kwargs: A dictionary where keys are arm parameter names and values are lists
                     of parameter values for each arm.
 
@@ -59,7 +66,7 @@ class Arm(ABC):
         params_dicts = [dict(zip(kwargs, t)) for t in zip(*kwargs.values())]
         if len(params_dicts) == 0:
             raise ValueError("insufficient parameters to create an arm")
-        return Bandit([cls(**params) for params in params_dicts])
+        return Bandit([cls(**params) for params in params_dicts], rng, seed)
 
 
 class BernoulliArm(Arm):

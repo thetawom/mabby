@@ -7,6 +7,7 @@ from itertools import zip_longest
 from typing import TYPE_CHECKING
 
 import numpy as np
+from numpy.random import Generator
 
 from mabby.simulation.agent import Agent
 from mabby.simulation.exceptions import SimulationUsageError
@@ -30,6 +31,7 @@ class Simulation:
         agents: Iterable[Agent] | None = None,
         strategies: Iterable[Strategy] | None = None,
         names: Iterable[str] | None = None,
+        rng: Generator | None = None,
         seed: int | None = None,
     ):
         """Initializes a simulation.
@@ -43,7 +45,8 @@ class Simulation:
             agents: A list of agents to simulate.
             strategies: A list of strategies to simulate.
             names: A list of names for agents.
-            seed: A seed for random number generation.
+            rng: A random number generator.
+            seed: A seed for random number generation if ``rng`` is not provided.
 
         Raises:
             SimulationUsageError: If neither ``agents`` nor ``strategies`` are supplied.
@@ -54,7 +57,7 @@ class Simulation:
         self.bandit = bandit
         if len(self.bandit) == 0:
             raise ValueError("bandit cannot be empty")
-        self._rng = np.random.default_rng(seed)
+        self._rng = rng if rng else np.random.default_rng(seed)
 
     @staticmethod
     def _create_agents(
