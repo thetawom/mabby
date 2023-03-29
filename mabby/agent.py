@@ -8,16 +8,16 @@ import numpy as np
 from numpy.random import Generator
 from numpy.typing import NDArray
 
-from mabby.simulation.exceptions import AgentUsageError
+from mabby.exceptions import AgentUsageError
 
 if TYPE_CHECKING:
     from mabby.strategies import Strategy
 
 
 class Agent:
-    """Agent in a multi-armed bandit simulation.
+    """Agent in a multi-armed bandit sim.
 
-    An agent represents an autonomous entity in a bandit simulation. It wraps around a
+    An agent represents an autonomous entity in a bandit sim. It wraps around a
     specified strategy and provides an interface for each part of the decision-making
     process, including making a choice then updating internal parameter estimates based
     on the observed rewards from that choice.
@@ -52,7 +52,7 @@ class Agent:
 
         Args:
             k: The number of bandit arms for the agent to choose from.
-            steps: The number of steps to the simulation will be run.
+            steps: The number of steps to the sim will be run.
             rng: A random number generator.
         """
         self._primed = True

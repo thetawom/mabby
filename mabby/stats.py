@@ -118,13 +118,13 @@ class Metric(Enum):
 
 
 class SimulationStats:
-    """Statistics for a multi-armed bandit simulation."""
+    """Statistics for a multi-armed bandit sim."""
 
     def __init__(self, simulation: Simulation):
-        """Initializes simulation statistics.
+        """Initializes sim statistics.
 
         Args:
-            simulation: The simulation to track.
+            simulation: The sim to track.
         """
         self._simulation: Simulation = simulation
         self._stats_dict: dict[Agent, AgentStats] = {}
@@ -168,7 +168,7 @@ class SimulationStats:
         return agent in self._stats_dict
 
     def plot(self, metric: Metric) -> None:
-        """Generates a plot for a simulation metric.
+        """Generates a plot for a sim metric.
 
         Args:
             metric: The metric to plot.
@@ -200,7 +200,7 @@ class SimulationStats:
 
 
 class AgentStats:
-    """Statistics for an agent in a multi-armed bandit simulation."""
+    """Statistics for an agent in a multi-armed bandit sim."""
 
     def __init__(
         self,
@@ -216,8 +216,8 @@ class AgentStats:
 
         Args:
             agent: The agent that statistics are tracked for
-            bandit: The bandit of the simulation being run
-            steps: The number of steps per trial in the simulation
+            bandit: The bandit of the sim being run
+            steps: The number of steps per trial in the sim
             metrics: A collection of metrics to track.
         """
         self.agent: Agent = agent  #: The agent that statistics are tracked for
@@ -248,7 +248,7 @@ class AgentStats:
         return metric.transform(values)
 
     def update(self, step: int, choice: int, reward: float) -> None:
-        """Updates metric values for the latest simulation step.
+        """Updates metric values for the latest sim step.
 
         Args:
             step: The number of the step.
