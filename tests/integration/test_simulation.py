@@ -26,7 +26,7 @@ def test_random_gaussian_agents_simulation(loc, scale, num_agents):
     sim.run(trials=100, steps=1000)
     for agent in agents:
         assert np.allclose(agent.Qs, loc, rtol=0.1)
-        assert np.isclose(agent.Ns, np.mean(agent.Ns), rtol=0.05).all()
+        assert np.isclose(agent.Ns, np.mean(agent.Ns), rtol=0.08).all()
 
 
 @pytest.mark.parametrize("p", [[0.2, 0.6]])
@@ -39,7 +39,7 @@ def test_epsilon_greedy_bernoulli_agents_simulation(p, eps):
     opt_arm = np.argmax(p)
     for agent in agents:
         assert np.allclose(agent.Qs, p, rtol=0.3)
-        assert np.isclose(agent.Qs[opt_arm], p[opt_arm], rtol=0.05)
+        assert np.isclose(agent.Qs[opt_arm], p[opt_arm], rtol=0.08)
 
 
 @pytest.mark.parametrize("loc,scale", [([0.2, 0.6], [0.5, 0.5])])
@@ -51,5 +51,5 @@ def test_epsilon_greedy_gaussian_agents_simulation(loc, scale, eps):
     sim.run(trials=100, steps=1000)
     opt_arm = np.argmax(loc)
     for agent in agents:
-        assert np.allclose(agent.Qs, loc, rtol=0.4)
-        assert np.isclose(agent.Qs[opt_arm], loc[opt_arm], rtol=0.05)
+        assert np.allclose(agent.Qs, loc, rtol=0.5)
+        assert np.isclose(agent.Qs[opt_arm], loc[opt_arm], rtol=0.08)

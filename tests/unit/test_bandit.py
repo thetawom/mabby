@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 import pytest
 
@@ -7,7 +9,7 @@ from mabby.simulation.arms import BernoulliArm, GaussianArm
 
 @pytest.fixture()
 def mock_rng(mocker):
-    return mocker.Mock()
+    return mocker.Mock(choice=lambda xs: random.choice(xs))
 
 
 class TestArm:
@@ -118,8 +120,8 @@ class TestBandit:
         return [arm_factory.generic() for _ in range(num_arms)]
 
     @pytest.fixture()
-    def bandit(self, arms):
-        return Bandit(arms=arms)
+    def bandit(self, arms, mock_rng):
+        return Bandit(arms=arms, rng=mock_rng)
 
     def test_init_sets_arms_list(self, arms, bandit):
         arms_list = bandit._arms
@@ -145,7 +147,7 @@ class TestBandit:
         self, mocker, arms, bandit, mock_rng, choice
     ):
         play_spy = mocker.spy(arms[choice], "play")
-        bandit.play(choice, mock_rng)
+        bandit.play(choice)
         play_spy.assert_called_once_with(mock_rng)
 
     def test_best_arm_returns_arm_with_max_mean(self, arms, bandit):
