@@ -1,4 +1,4 @@
-"""Provides ``Simulation`` class for running multi-armed bandit simulations."""
+"""Provides :class:`Simulation` class for running multi-armed bandit simulations."""
 
 from __future__ import annotations
 
@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 class Simulation:
     """Simulation of a multi-armed bandit problem.
 
-    A sim consists of multiple trials of one or more bandit strategies run on a
+    A simulation consists of multiple trials of one or more bandit strategies run on a
     configured multi-armed bandit.
     """
 
@@ -34,9 +34,9 @@ class Simulation:
         rng: Generator | None = None,
         seed: int | None = None,
     ):
-        """Initializes a sim.
+        """Initializes a simulation.
 
-        One of ``agents`` or ``strategies`` must be supplied. If `agents` is supplied,
+        One of ``agents`` or ``strategies`` must be supplied. If ``agents`` is supplied,
         ``strategies`` and ``names`` are ignored. Otherwise, an ``agent`` is created for
         each ``strategy`` and given a name from ``names`` if available.
 
@@ -80,20 +80,20 @@ class Simulation:
     def run(
         self, trials: int, steps: int, metrics: Iterable[Metric] | None = None
     ) -> SimulationStats:
-        """Runs a sim.
+        """Runs a simulation.
 
-        In a sim run, each agent or strategy is run for the specified number of
+        In a simulation run, each agent or strategy is run for the specified number of
         trials, and each trial is run for the given number of steps.
 
         If ``metrics`` is not specified, all available metrics are tracked by default.
 
         Args:
-            trials: The number of trials in the sim.
+            trials: The number of trials in the simulation.
             steps: The number of steps in a trial.
             metrics: A list of metrics to collect.
 
         Returns:
-            A ``SimulationStats`` object with the results of the sim.
+            A ``SimulationStats`` object with the results of the simulation.
         """
         sim_stats = SimulationStats(simulation=self)
         for agent in self.agents:

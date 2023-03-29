@@ -27,6 +27,8 @@ pytest-mock = "^3.10.0"
 pyproject-fmt = "^0.9.1"
 pytest-randomly = "^3.12.0"
 pytest-xdist = "^3.2.0"
+sphinx = "^6.1.3"
+furo = "^2023.3.27"
 
 [tool.ruff]
 target-version = "py39"
@@ -35,6 +37,7 @@ select = ["E", "F", "I", "D", "UP", "B", "Q", "SIM", "NPY", "RUF", "C90"]
 
 [tool.ruff.per-file-ignores]
 "tests/*" = ["D"]
+"docs/*" = ["D"]
 "mabby/strategies/*" = ["D"] # remove later
 
 [tool.ruff.pydocstyle]

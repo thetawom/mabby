@@ -1,4 +1,4 @@
-"""Provides ``Agent`` class for running multi-armed bandit simulations."""
+"""Provides :class:`Agent` class for running multi-armed bandit simulations."""
 
 from __future__ import annotations
 
@@ -15,9 +15,9 @@ if TYPE_CHECKING:
 
 
 class Agent:
-    """Agent in a multi-armed bandit sim.
+    """Agent in a multi-armed bandit simulation.
 
-    An agent represents an autonomous entity in a bandit sim. It wraps around a
+    An agent represents an autonomous entity in a bandit simulation. It wraps around a
     specified strategy and provides an interface for each part of the decision-making
     process, including making a choice then updating internal parameter estimates based
     on the observed rewards from that choice.
@@ -52,7 +52,7 @@ class Agent:
 
         Args:
             k: The number of bandit arms for the agent to choose from.
-            steps: The number of steps to the sim will be run.
+            steps: The number of steps to the simulation will be run.
             rng: A random number generator.
         """
         self._primed = True
@@ -95,7 +95,7 @@ class Agent:
 
     @property
     def Qs(self) -> NDArray[np.float64]:
-        """Returns the agent's current estimated action values (Q-values).
+        """The agent's current estimated action values (Q-values).
 
         The action values are only available after the agent has been primed.
 
@@ -111,7 +111,7 @@ class Agent:
 
     @property
     def Ns(self) -> NDArray[np.uint32]:
-        """Returns the number of times the agent has played each arm.
+        """The number of times the agent has played each arm.
 
         The play counts are only available after the agent has been primed.
 

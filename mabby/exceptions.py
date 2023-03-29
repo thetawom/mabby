@@ -8,7 +8,7 @@ class AgentUsageError(Exception):
 
 
 class SimulationUsageError(Exception):
-    """Raised when sim methods are used incorrectly."""
+    """Raised when simulation methods are used incorrectly."""
 
     pass
 

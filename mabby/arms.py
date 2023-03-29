@@ -1,4 +1,4 @@
-"""Provides ``Arm`` base class and different reward distribution implementations."""
+"""Provides :class:`Arm` base class with reward distribution implementations."""
 
 from __future__ import annotations
 
@@ -35,7 +35,7 @@ class Arm(ABC):
     @property
     @abstractmethod
     def mean(self) -> float:
-        """Returns the mean reward of the arm.
+        """The mean reward of the arm.
 
         Returns:
             The computed mean of the arm's reward distribution.
@@ -93,7 +93,7 @@ class BernoulliArm(Arm):
 
     @property
     def mean(self) -> float:
-        """Returns the mean reward of the arm.
+        """The mean reward of the arm.
 
         Returns:
             The computed mean of the arm's reward distribution.
@@ -131,7 +131,7 @@ class GaussianArm(Arm):
 
     @property
     def mean(self) -> float:
-        """Returns the mean reward of the arm.
+        """The mean reward of the arm.
 
         Returns:
             The computed mean of the arm's reward distribution.
