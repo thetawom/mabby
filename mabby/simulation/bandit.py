@@ -57,17 +57,16 @@ class Bandit:
         """Returns an iterator over the bandit's arms."""
         return iter(self._arms)
 
-    def play(self, i: int, rng: Generator) -> float:
+    def play(self, i: int) -> float:
         """Plays an arm by index.
 
         Args:
             i: The index of the arm to play.
-            rng: A random number generator.
 
         Returns:
             The reward from playing the arm.
         """
-        return self[i].play(rng)
+        return self[i].play(self._rng)
 
     @property
     def means(self) -> list[float]:

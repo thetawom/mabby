@@ -110,7 +110,7 @@ class Simulation:
             agent.prime(len(self.bandit), steps, self._rng)
             for step in range(steps):
                 choice = agent.choose()
-                reward = self.bandit.play(choice, self._rng)
+                reward = self.bandit.play(choice)
                 agent.update(reward)
                 agent_stats.update(step, choice, reward)
         return agent_stats
