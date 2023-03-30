@@ -1,4 +1,4 @@
-﻿mabby.strategies.ts.BetaTSStrategy
+mabby.strategies.ts.BetaTSStrategy
 ==================================
 
 .. currentmodule:: mabby.strategies.ts

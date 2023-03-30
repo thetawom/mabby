@@ -1,4 +1,4 @@
-﻿mabby.strategies.semi\_uniform.SemiUniformStrategy
+mabby.strategies.semi\_uniform.SemiUniformStrategy
 ==================================================
 
 .. currentmodule:: mabby.strategies.semi_uniform

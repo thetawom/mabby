@@ -1,4 +1,4 @@
-﻿mabby.arms.GaussianArm
+mabby.arms.GaussianArm
 ======================
 
 .. currentmodule:: mabby.arms

@@ -1,4 +1,4 @@
-﻿mabby.arms.BernoulliArm
+mabby.arms.BernoulliArm
 =======================
 
 .. currentmodule:: mabby.arms

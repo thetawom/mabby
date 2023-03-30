@@ -1,4 +1,4 @@
-﻿mabby.strategies.semi\_uniform.RandomStrategy
+mabby.strategies.semi\_uniform.RandomStrategy
 =============================================
 
 .. currentmodule:: mabby.strategies.semi_uniform

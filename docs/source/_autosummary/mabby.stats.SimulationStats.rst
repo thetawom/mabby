@@ -1,4 +1,4 @@
-﻿mabby.stats.SimulationStats
+mabby.stats.SimulationStats
 ===========================
 
 .. currentmodule:: mabby.stats
