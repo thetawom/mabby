@@ -1,4 +1,4 @@
-﻿mabby.strategies.strategy.Strategy
+mabby.strategies.strategy.Strategy
 ==================================
 
 .. currentmodule:: mabby.strategies.strategy

@@ -1,4 +1,4 @@
-﻿mabby.agent.Agent
+mabby.agent.Agent
 =================
 
 .. currentmodule:: mabby.agent

@@ -1,4 +1,4 @@
-﻿mabby.strategies.ucb.UCB1Strategy
+mabby.strategies.ucb.UCB1Strategy
 =================================
 
 .. currentmodule:: mabby.strategies.ucb

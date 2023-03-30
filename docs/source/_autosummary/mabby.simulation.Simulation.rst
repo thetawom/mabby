@@ -1,4 +1,4 @@
-﻿mabby.simulation.Simulation
+mabby.simulation.Simulation
 ===========================
 
 .. currentmodule:: mabby.simulation

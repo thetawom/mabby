@@ -1,4 +1,4 @@
-﻿mabby.stats.AgentStats
+mabby.stats.AgentStats
 ======================
 
 .. currentmodule:: mabby.stats

@@ -1,4 +1,4 @@
-﻿mabby.arms.Arm
+mabby.arms.Arm
 ==============
 
 .. currentmodule:: mabby.arms

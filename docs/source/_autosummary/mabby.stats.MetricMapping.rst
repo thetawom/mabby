@@ -1,4 +1,4 @@
-﻿mabby.stats.MetricMapping
+mabby.stats.MetricMapping
 =========================
 
 .. currentmodule:: mabby.stats

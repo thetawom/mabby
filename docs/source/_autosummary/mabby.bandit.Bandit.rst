@@ -1,4 +1,4 @@
-﻿mabby.bandit.Bandit
+mabby.bandit.Bandit
 ===================
 
 .. currentmodule:: mabby.bandit

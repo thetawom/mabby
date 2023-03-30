@@ -5,11 +5,12 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 from numpy.random import Generator
+from overrides import EnforceOverrides, override
 
 from mabby.bandit import Bandit
 
 
-class Arm(ABC):
+class Arm(ABC, EnforceOverrides):
     """Base class for a bandit arm implementing a reward distribution.
 
     An arm represents one of the decision choices available to the agent in a bandit
@@ -80,28 +81,17 @@ class BernoulliArm(Arm):
         """
         self.p: float = p  #: Parameter of the Bernoulli distribution
 
-    def play(self, rng: Generator) -> int:
-        """Plays the arm and samples a reward.
-
-        Args:
-            rng: A random number generator.
-
-        Returns:
-            The sampled reward from the arm's reward distribution.
-        """
+    @override
+    def play(self, rng: Generator) -> float:
         return rng.binomial(1, self.p)
 
     @property
+    @override
     def mean(self) -> float:
-        """The mean reward of the arm.
-
-        Returns:
-            The computed mean of the arm's reward distribution.
-        """
         return self.p
 
+    @override
     def __repr__(self) -> str:
-        """Returns the string representation of the arm."""
         return f"Bernoulli(p={self.p})"
 
 
@@ -118,26 +108,15 @@ class GaussianArm(Arm):
         self.loc: float = loc  #: Mean ("center") of the Gaussian distribution
         self.scale: float = scale  #: Standard deviation of the Gaussian distribution
 
+    @override
     def play(self, rng: Generator) -> float:
-        """Plays the arm and samples a reward.
-
-        Args:
-            rng: A random number generator.
-
-        Returns:
-            The sampled reward from the arm's reward distribution.
-        """
         return rng.normal(self.loc, self.scale)
 
     @property
+    @override
     def mean(self) -> float:
-        """The mean reward of the arm.
-
-        Returns:
-            The computed mean of the arm's reward distribution.
-        """
         return self.loc
 
+    @override
     def __repr__(self) -> str:
-        """Returns the string representation of the arm."""
         return f"Gaussian(loc={self.loc}, scale={self.scale})"

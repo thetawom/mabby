@@ -6,6 +6,7 @@ import numpy as np
 import pytest
 from numpy.random import Generator
 from numpy.typing import NDArray
+from overrides import override
 
 from mabby import Agent, Arm
 from mabby.strategies import Strategy
@@ -36,13 +37,16 @@ class GenericArm(Arm):
     def __init__(self, mean: float = 0):
         self._mean = mean
 
+    @override
     def play(self, rng: Generator) -> float:
         return 1
 
     @property
+    @override
     def mean(self) -> float:
         return self._mean
 
+    @override
     def __repr__(self) -> str:
         return "generic-arm"
 

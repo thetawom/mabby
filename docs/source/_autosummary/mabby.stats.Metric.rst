@@ -1,4 +1,4 @@
-﻿mabby.stats.Metric
+mabby.stats.Metric
 ==================
 
 .. currentmodule:: mabby.stats

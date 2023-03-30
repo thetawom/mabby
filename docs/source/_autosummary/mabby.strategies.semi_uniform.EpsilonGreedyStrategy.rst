@@ -1,4 +1,4 @@
-﻿mabby.strategies.semi\_uniform.EpsilonGreedyStrategy
+mabby.strategies.semi\_uniform.EpsilonGreedyStrategy
 ====================================================
 
 .. currentmodule:: mabby.strategies.semi_uniform

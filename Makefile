@@ -22,9 +22,9 @@ $(INSTALL_STAMP): pyproject.toml poetry.lock
 ##@ Linting
 .PHONY: lint
 lint: $(INSTALL_STAMP) ## run code linters
-	$(POETRY) run ruff check ./docs/ ./tests/ $(NAME) --exit-zero
-	$(POETRY) run black --check ./docs/ ./tests/ $(NAME) --diff
-	$(POETRY) run mdformat --check ./*.md ./tests/ $(NAME) ./.github/ ./assets/
+	$(POETRY) run ruff check ./docs/ ./examples/ ./tests/ $(NAME) --exit-zero
+	$(POETRY) run black --check ./docs/ ./examples/ ./tests/ $(NAME) --diff
+	$(POETRY) run mdformat --check ./*.md ./docs/ ./tests/ ./examples/ $(NAME) ./.github/ ./assets/
 	$(POETRY) run pyproject-fmt --check ./pyproject.toml
 	$(POETRY) run mypy $(NAME) --ignore-missing-imports
 
@@ -33,9 +33,9 @@ lints: lint
 
 .PHONY: format
 format: $(INSTALL_STAMP) ## reformat code
-	$(POETRY) run ruff check --fix ./docs/ ./tests/ $(NAME) --exit-zero
-	$(POETRY) run black ./docs/ ./tests/ $(NAME)
-	$(POETRY) run mdformat ./*.md ./tests/ $(NAME) ./.github/ ./assets/
+	$(POETRY) run ruff check --fix ./docs/ ./examples/ ./tests/ $(NAME) --exit-zero
+	$(POETRY) run black ./docs/ ./examples/ ./tests/ $(NAME)
+	$(POETRY) run mdformat ./*.md ./docs/ ./tests/ ./examples/ $(NAME) ./.github/ ./assets/
 	$(POETRY) run pyproject-fmt ./pyproject.toml
 
 .PHONY: fix
