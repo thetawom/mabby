@@ -6,7 +6,7 @@ repos:
         name: sync with poetry
         args: [--db=.pre-commit-sync.json]
   - repo: https://github.com/charliermarsh/ruff-pre-commit
-    rev: v0.0.252
+    rev: v0.0.260
     hooks:
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
@@ -22,7 +22,7 @@ repos:
       - id: check-toml
       - id: check-yaml
   - repo: https://github.com/psf/black
-    rev: 23.1.0
+    rev: 23.3.0
     hooks:
       - id: black
   - repo: https://github.com/executablebooks/mdformat
@@ -35,7 +35,7 @@ repos:
           - mdformat-frontmatter
           - mdformat-footnote
   - repo: https://github.com/tox-dev/pyproject-fmt
-    rev: "0.9.1"
+    rev: "0.9.2"
     hooks:
       - id: pyproject-fmt
   - repo: https://github.com/pre-commit/mirrors-mypy
