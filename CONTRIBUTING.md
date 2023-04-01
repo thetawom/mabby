@@ -1,5 +1,21 @@
 # Contributing
 
+[![poetry](https://img.shields.io/badge/packaging-poetry-008adf)](https://python-poetry.org/)
+[![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white)](https://github.com/pre-commit/pre-commit)
+[![black](https://img.shields.io/badge/code%20style-black-000000)](https://github.com/psf/black)
+[![mypy](http://www.mypy-lang.org/static/mypy_badge.svg)](http://mypy-lang.org/)
+[![ruff](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/charliermarsh/ruff/main/assets/badge/v1.json)](https://github.com/charliermarsh/ruff)
+
+We welcome and value all types of contributions, from bug reports to feature additions. Please make sure to read the relevant section(s) below before making your contribution.
+
+And if you like the project but just don't have time to contribute, there are other easy ways to support the project and show your appreciation. We'd love if you could:
+
+- Star the project
+- Refer this project in your project's README
+- Mention the project at local meetups and tell your friends/colleagues
+
+Once again, thank you for supporting the project and taking the time to contribute!
+
 ## Code of Conduct
 
 Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
