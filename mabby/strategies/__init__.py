@@ -1,3 +1,10 @@
+"""Multi-armed bandit strategies.
+
+**mabby** provides a collection of preset bandit strategies that can be plugged into
+simulations. The :class:`strategy.Strategy` abstract base class can also be
+sub-classed to implement custom bandit strategies.
+"""
+
 from mabby.strategies.semi_uniform import (
     EpsilonGreedyStrategy,
     RandomStrategy,
