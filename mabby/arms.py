@@ -55,11 +55,11 @@ class Arm(ABC, EnforceOverrides):
     ) -> Bandit:
         """Creates a bandit with arms of the same reward distribution type.
 
-        Keyword Args:
+        Args:
             rng: A random number generator.
             seed: A seed for random number generation if ``rng`` is not provided.
-            kwargs: A dictionary where keys are arm parameter names and values are lists
-                    of parameter values for each arm.
+            **kwargs: A dictionary where keys are arm parameter names and values are
+                lists of parameter values for each arm.
 
         Returns:
             A bandit with the specified arms.

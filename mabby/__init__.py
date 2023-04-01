@@ -1,6 +1,6 @@
 """A multi-armed bandit (MAB) simulation library.
 
-mabby is a library for simulating multi-armed bandits (MABs), a resource-allocation
+**mabby** is a library for simulating multi-armed bandits (MABs), a resource-allocation
 problem and framework in reinforcement learning. It allows users to quickly yet flexibly
 define and run bandit simulations, with the ability to:
 

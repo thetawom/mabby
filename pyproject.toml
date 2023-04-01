@@ -40,7 +40,6 @@ select = ["E", "F", "I", "D", "UP", "B", "Q", "SIM", "NPY", "RUF", "C90"]
 "tests/*" = ["D"]
 "docs/*" = ["D"]
 "examples/*" = ["D"]
-"mabby/strategies/*" = ["D"] # remove later
 
 [tool.ruff.pydocstyle]
 convention = "google"

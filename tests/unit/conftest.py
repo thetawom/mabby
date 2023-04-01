@@ -15,20 +15,32 @@ from mabby.strategies import Strategy
 class GenericStrategy(Strategy):
     k: int
 
+    def __init__(self) -> None:
+        pass
+
+    @override
+    def __repr__(self) -> str:
+        return "generic-strategy"
+
+    @override
     def prime(self, k: int, steps: int) -> None:
         self.k = k
 
+    @override
     def choose(self, rng: Generator) -> int:
         return 0
 
+    @override
     def update(self, choice: int, reward: float, rng: Generator | None = None) -> None:
         pass
 
     @property
+    @override
     def Qs(self) -> NDArray[np.float64]:
         return np.zeros(self.k)
 
     @property
+    @override
     def Ns(self) -> NDArray[np.int32]:
         return np.zeros(self.k)
 
