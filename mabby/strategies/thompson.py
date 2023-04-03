@@ -19,7 +19,7 @@ class BetaTSStrategy(Strategy):
     _b: NDArray[np.uint32]
 
     def __init__(self, general: bool = False):
-        """Initializes a beta Thompson sampling strategy.
+        """Initializes a Beta Thompson sampling strategy.
 
         If ``general`` is ``False``, rewards used for updates must be either 0 or 1.
         Otherwise, rewards must be with support [0, 1].

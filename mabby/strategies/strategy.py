@@ -1,4 +1,4 @@
-"""Provides :class:`Strategy` class for :class:`Agent` decision-making."""
+"""Provides [`Strategy`][mabby.strategies.strategy.Strategy] class."""
 
 from __future__ import annotations
 
@@ -72,7 +72,7 @@ class Strategy(ABC, EnforceOverrides):
 
         Args:
             **kwargs: Parameters for initializing the agent (see
-                :meth:`mabby.agent.Agent.__init__`)
+                [`Agent`][mabby.agent.Agent])
 
         Returns:
             The created agent with the strategy.

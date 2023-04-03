@@ -22,7 +22,8 @@ from mabby.utils import random_argmax
 class SemiUniformStrategy(Strategy, ABC, EnforceOverrides):
     """Base class for semi-uniform bandit strategies.
 
-    Every semi-uniform strategy must implement :meth:`SemiUniformStrategy.effective_eps`
+    Every semi-uniform strategy must implement
+    [`effective_eps`][mabby.strategies.semi_uniform.SemiUniformStrategy.effective_eps]
     to compute the chance of exploration at each time step.
     """
 

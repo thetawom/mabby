@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 class MetricMapping:
     """Transformation from a base metric.
 
-    See :class:`Metric` for examples of metric mappings.
+    See [`Metric`][mabby.stats.Metric] for examples of metric mappings.
     """
 
     #: The base metric to transform from

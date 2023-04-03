@@ -1,8 +1,8 @@
 """Multi-armed bandit strategies.
 
 **mabby** provides a collection of preset bandit strategies that can be plugged into
-simulations. The :class:`strategy.Strategy` abstract base class can also be
-sub-classed to implement custom bandit strategies.
+simulations. The [`Strategy`][mabby.strategies.strategy.Strategy] abstract base class
+can also be sub-classed to implement custom bandit strategies.
 """
 
 from mabby.strategies.semi_uniform import (
@@ -11,7 +11,7 @@ from mabby.strategies.semi_uniform import (
     SemiUniformStrategy,
 )
 from mabby.strategies.strategy import Strategy
-from mabby.strategies.ts import BetaTSStrategy
+from mabby.strategies.thompson import BetaTSStrategy
 from mabby.strategies.ucb import UCB1Strategy
 
 __all__ = [

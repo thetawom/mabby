@@ -1,4 +1,4 @@
-"""Provides :class:`Agent` class for running multi-armed bandit simulations."""
+"""Provides [`Agent`][mabby.agent.Agent] class for bandit simulations."""
 
 from __future__ import annotations
 
