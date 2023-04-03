@@ -1,4 +1,4 @@
-"""Provides :class:`Arm` base class with reward distribution implementations."""
+"""Provides [`Arm`][mabby.arms.Arm] base class with some common reward distributions."""
 
 from __future__ import annotations
 

@@ -13,6 +13,7 @@ from mabby.arms import Arm, BernoulliArm, GaussianArm
 from mabby.bandit import Bandit
 from mabby.simulation import Simulation
 from mabby.stats import Metric, SimulationStats
+from mabby.strategies import Strategy
 
 __all__ = [
     "Agent",
@@ -23,4 +24,5 @@ __all__ = [
     "Simulation",
     "Metric",
     "SimulationStats",
+    "Strategy",
 ]
