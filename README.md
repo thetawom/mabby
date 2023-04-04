@@ -4,8 +4,9 @@
 
 [![license](https://img.shields.io/github/license/ew2664/mabby)](https://github.com/ew2664/mabby/blob/main/LICENSE)
 [![issues](https://img.shields.io/github/issues/ew2664/mabby)](https://github.com/ew2664/mabby/issues)
-[![build](https://img.shields.io/github/actions/workflow/status/ew2664/mabby/ci.yml)](https://github.com/ew2664/mabby/actions/workflows/ci.yml)
+[![build](https://img.shields.io/github/actions/workflow/status/ew2664/mabby/build.yml)](https://github.com/ew2664/mabby/actions/workflows/ci.yml)
 [![coverage](https://coveralls.io/repos/github/ew2664/mabby/badge.svg)](https://coveralls.io/github/ew2664/mabby)
+[![docs](https://img.shields.io/github/actions/workflow/status/ew2664/mabby/docs.yml?label=docs)](https://ew2664.github.io/mabby/)
 [![PyPI](https://img.shields.io/pypi/v/mabby)](https://pypi.org/project/mabby/)
 
 **mabby** is a library for simulating [multi-armed bandits (MABs)](https://en.wikipedia.org/wiki/Multi-armed_bandit), a resource-allocation problem and framework in reinforcement learning. It allows users to quickly yet flexibly define and run bandit simulations, with the ability to:
