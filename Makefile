@@ -63,15 +63,15 @@ tests: test
 unit: $(INSTALL_STAMP) ## run all unit tests
 	$(POETRY) run pytest ./tests/unit/ --cov-report lcov --cov $(NAME)
 
-.PHONY: test-unit
-test-unit: unit
+.PHONY: unit-test
+unit-test: unit
 
 .PHONY: integration
 integration: $(INSTALL_STAMP) ## run all integration tests
 	$(POETRY) run pytest -n auto ./tests/integration/ $(NAME)
 
-.PHONY: test-integration
-test-integration: integration
+.PHONY: integration-test
+integration-test: integration
 
 .PHONY: coverage
 coverage: $(INSTALL_STAMP) ## generate HTML coverage report
