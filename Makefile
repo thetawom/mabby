@@ -16,7 +16,7 @@ help:
 install: $(INSTALL_STAMP) ## install packages and prepare environment
 $(INSTALL_STAMP): pyproject.toml poetry.lock
 	@if [ -z $(POETRY) ]; then echo "Poetry could not be found. See https://python-poetry.org/docs/"; exit 2; fi
-	$(POETRY) install
+	$(POETRY) install --with docs
 	touch $(INSTALL_STAMP)
 
 ##@ Linting
