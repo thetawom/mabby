@@ -1,4 +1,4 @@
-name: CI
+name: "Build"
 
 on:
   push:
@@ -11,9 +11,7 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python 3.9
@@ -39,7 +37,7 @@ jobs:
         make lint
     - name: Run unit tests
       run: |
-        make test-unit
+        make unit-test
     - name: Upload coverage report
       uses: coverallsapp/github-action@master
       with:
@@ -47,4 +45,4 @@ jobs:
         path-to-lcov: "./coverage.lcov"
     - name: Run integration tests
       run: |
-        make test-integration
+        make integration-test
