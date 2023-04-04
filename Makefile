@@ -3,6 +3,7 @@
 
 NAME := mabby
 INSTALL_STAMP := .install.stamp
+INSTALL_DOCS_STAMP := .install-docs.stamp
 POETRY := $(shell command -v poetry 2> /dev/null)
 
 .DEFAULT_GOAL := help
@@ -18,6 +19,7 @@ $(INSTALL_STAMP): pyproject.toml poetry.lock
 	@if [ -z $(POETRY) ]; then echo "Poetry could not be found. See https://python-poetry.org/docs/"; exit 2; fi
 	$(POETRY) install --with docs
 	touch $(INSTALL_STAMP)
+	touch $(INSTALL_DOCS_STAMP)
 
 ##@ Linting
 .PHONY: lint
@@ -75,6 +77,26 @@ test-integration: integration
 coverage: $(INSTALL_STAMP) ## generate HTML coverage report
 	$(POETRY) run pytest ./tests/unit/ --cov-report term-missing --cov-report html --cov $(NAME)
 
+##@ Documentation
+.PHONY: install-docs
+install-docs: $(INSTALL_DOCS_STAMP) ## install documentation packages
+$(INSTALL_DOCS_STAMP): pyproject.toml poetry.lock
+	@if [ -z $(POETRY) ]; then echo "Poetry could not be found. See https://python-poetry.org/docs/"; exit 2; fi
+	$(POETRY) install --only docs
+	touch $(INSTALL_DOCS_STAMP)
+
+.PHONY: build-docs
+build-docs: $(INSTALL_DOCS_STAMP) ## build documentation
+	$(POETRY) run mkdocs build
+
+.PHONY: serve-docs
+serve-docs: $(INSTALL_DOCS_STAMP) ## run documentation development server
+	$(POETRY) run mkdocs serve
+
+.PHONY: deploy-docs
+deploy-docs: $(INSTALL_DOCS_STAMP) ## deploy documentation to GitHub pages
+	$(POETRY) run mkdocs gh-deploy
+
 ##@ Cleanup
 .PHONY: deep-clean
 deep-clean: ## remove all untracked files
@@ -83,4 +105,4 @@ deep-clean: ## remove all untracked files
 .PHONY: clean
 clean: ## remove all temporary files
 	find . -type d -name "__pycache__" | xargs rm -rf {};
-	rm -rf $(INSTALL_STAMP) .coverage coverage *.lcov cover htmlcov logs build dist *.egg-info .mypy_cache .pytest_cache .ruff_cache
+	rm -rf $(INSTALL_STAMP) $(INSTALL_DOCS_STAMP) .coverage coverage *.lcov cover htmlcov logs build dist *.egg-info .mypy_cache .pytest_cache .ruff_cache
