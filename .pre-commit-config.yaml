@@ -29,11 +29,9 @@ repos:
     rev: 0.7.16
     hooks:
       - id: mdformat
+        exclude: docs/.*
         additional_dependencies:
-          - mdformat-gfm
-          - mdformat-black
-          - mdformat-frontmatter
-          - mdformat-footnote
+          - mdformat-mkdocs
   - repo: https://github.com/tox-dev/pyproject-fmt
     rev: "0.9.2"
     hooks:

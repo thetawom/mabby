@@ -1,0 +1,77 @@
+site_name: mabby
+site_url: https://ew2664.github.io/mabby
+repo_url: https://github.com/ew2664/mabby
+repo_name: ew2664/mabby
+site_description: A multi-armed bandit (MAB) simulation library in Python
+copyright: |
+  Copyright &copy; 2023 <a href="https://github.com/ew2664"  target="_blank">Ethan Wu</a>
+watch:
+  - mabby
+  - README.md
+  - LICENSE
+  - CONTRIBUTING.md
+  - CODE_OF_CONDUCT.md
+
+nav:
+- Home:
+  - Overview: index.md
+  - License: license.md
+- Code Reference: reference/
+- Development:
+  - Contributing: contributing.md
+  - Code of Conduct: code_of_conduct.md
+
+theme:
+  name: "material"
+  features:
+    - navigation.tabs
+    - navigation.top
+    - content.code.copy
+  icon:
+    logo: material/book-open-page-variant
+    repo: fontawesome/brands/git-alt
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: deep-purple
+      accent: deep-purple
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: deep-purple
+      accent: deep-purple
+      toggle:
+        icon: material/weather-night
+        name: Switch to light mode
+
+markdown_extensions:
+- admonition
+- callouts
+- pymdownx.emoji
+- pymdownx.magiclink
+- pymdownx.details
+- pymdownx.superfences
+- markdown_include.include
+
+plugins:
+  - search
+  - gen-files:
+      scripts:
+        - docs/gen_ref_nav.py
+  - literate-nav:
+      nav_file: SUMMARY.txt
+  - section-index
+  - mkdocstrings:
+      handlers:
+        python:
+          import:
+            - https://docs.python.org/3/objects.inv
+            - https://docs.scipy.org/doc/numpy/objects.inv
+          options:
+            docstring_style: google
+            docstring_options:
+              ignore_init_summary: yes
+            merge_init_into_class: yes
+            show_submodules: no
