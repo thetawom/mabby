@@ -18,7 +18,7 @@ Once again, thank you for supporting the project and taking the time to contribu
 
 ## Code of Conduct
 
-Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
+Please read and follow our [Code of Conduct](https://ew2664.github.io/mabby/code_of_conduct/).
 
 ## Reporting Bugs
 
@@ -42,15 +42,15 @@ Before contributing, make sure you have [Python 3.9+](https://www.python.org/) a
 
 1. Run `make lint` and `make test` and ensure they pass.
 
-   > Run `make format` to fix the linting errors that are auto-fixable.
+    TIP: Run `make format` to fix the linting errors that are auto-fixable.
 
-   > Run `make coverage` to run unit tests only and generate an HTML coverage report.
+    TIP: Run `make coverage` to run unit tests only and generate an HTML coverage report.
 
 1. Commit your changes following our [commit conventions](#commit-conventions).
 
 1. Push your changes to your fork of the repository.
 
-1. Open a [pull request](https://github.com/ew2664/mabby/pulls)! 🎉🎉🎉
+1. Open a [pull request](https://github.com/ew2664/mabby/pulls)! :tada::tada::tada:
 
 ## Commit Conventions
 

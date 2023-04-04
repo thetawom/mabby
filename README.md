@@ -64,8 +64,8 @@ stats.plot_optimality()
 
 ## Contributing
 
-Please see [CONTRIBUTING](CONTRIBUTING.md) for more information.
+Please see [CONTRIBUTING](https://ew2664.github.io/mabby/contributing/) for more information.
 
 ## License
 
-This software is licensed under the Apache 2.0 license. Please see [LICENSE](LICENSE) for more information.
+This software is licensed under the Apache 2.0 license. Please see [LICENSE](https://ew2664.github.io/mabby/license/) for more information.

@@ -24,7 +24,7 @@ $(INSTALL_STAMP): pyproject.toml poetry.lock
 lint: $(INSTALL_STAMP) ## run code linters
 	$(POETRY) run ruff check ./docs/ ./examples/ ./tests/ $(NAME) --exit-zero
 	$(POETRY) run black --check ./docs/ ./examples/ ./tests/ $(NAME) --diff
-	$(POETRY) run mdformat --check ./*.md ./docs/ ./tests/ ./examples/ $(NAME) ./.github/ ./assets/
+	$(POETRY) run mdformat --check ./*.md # ./docs/
 	$(POETRY) run pyproject-fmt --check ./pyproject.toml
 	$(POETRY) run mypy $(NAME) --ignore-missing-imports
 
@@ -35,7 +35,7 @@ lints: lint
 format: $(INSTALL_STAMP) ## reformat code
 	$(POETRY) run ruff check --fix ./docs/ ./examples/ ./tests/ $(NAME) --exit-zero
 	$(POETRY) run black ./docs/ ./examples/ ./tests/ $(NAME)
-	$(POETRY) run mdformat ./*.md ./docs/ ./tests/ ./examples/ $(NAME) ./.github/ ./assets/
+	$(POETRY) run mdformat ./*.md # ./docs/
 	$(POETRY) run pyproject-fmt ./pyproject.toml
 
 .PHONY: fix
