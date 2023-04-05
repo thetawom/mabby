@@ -17,7 +17,7 @@
 
 ## Installation
 
-Prerequisites: Python 3.9+ and `pip`
+Prerequisites: [Python 3.9+](https://www.python.org/downloads/) and `pip`
 
 Install **mabby** with `pip`:
 
@@ -27,41 +27,26 @@ pip install mabby
 
 ## Basic Usage
 
-First, configure the arms and rewards of the bandit problem to simulate. For example, the following creates a two-armed Bernoulli bandit.
+The code example below demonstrates the basic steps of running a simulation with **mabby**. For more in-depth examples, please see the [Usage Examples](https://ew2664.github.io/mabby/examples/) section of the **mabby** documentation.
 
 ```python
-bandit = Bandit(arms=[BernoulliArm(p=0.3), BernoulliArm(p=0.6)])
-```
+import mabby as mb
 
-If all arms of the bandit have rewards distributions of the same type, then the following shorthand can also be used.
+# configure bandit arms
+bandit = mb.BernoulliArm.bandit(p=[0.3, 0.6])
 
-```python
-bandit = BernoulliArm.bandit(p=[0.3, 0.6])
-```
+# configure bandit strategy
+strategy = mb.strategies.EpsilonGreedyStrategy(eps=0.2)
 
-Next, specify the bandit strategy to simulate by creating a `Strategy` with desired parameter values. For example, the following sets up an epsilon-greedy strategy with `eps=0.2`.
+# setup simulation
+simulation = mb.Simulation(bandit=bandit, strategies=[strategy])
 
-```python
-strategy = EpsilonGreedyStrategy(eps=0.2)
-```
-
-Run a simulation with the bandit and bandit strategy for a specified number of trials and steps per trial. When creating the `Simulation`, multiple strategies can be specified to be run together for comparison.
-
-```python
-simulation = Simulation(bandit=bandit, strategies=[strategy])
+# run simulation
 stats = simulation.run(trials=100, steps=300)
+
+# plot regret statistics
+stats.plot_regret()
 ```
-
-Running the simulation outputs a `SimulationStats` object that can be used to visualize the tracked metrics.
-
-```python
-stats.plot_regret(cumulative=True)
-stats.plot_optimality()
-```
-
-## Examples
-
-- [**Bernoulli Bandits**](docs/examples/bernoulli_bandit.py): a four-armed Bernoulli bandit simulation comparing epsilon-greedy, UCB1, and Thompson sampling strategies
 
 ## Contributing
 

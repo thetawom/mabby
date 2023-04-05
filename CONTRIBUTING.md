@@ -26,7 +26,7 @@ When submitting a new bug report, please first [search](https://github.com/ew266
 
 ## Development
 
-Before contributing, make sure you have [Python 3.9+](https://www.python.org/) and [poetry](https://python-poetry.org/) installed.
+Before contributing, make sure you have [Python 3.9+](https://www.python.org/downloads/) and [poetry](https://python-poetry.org/) installed.
 
 1. Fork the [repository](https://github.com/ew2664/mabby) on GitHub.
 
