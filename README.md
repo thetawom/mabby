@@ -61,7 +61,7 @@ stats.plot_optimality()
 
 ## Examples
 
-- [**Bernoulli Bandits**](./examples/bernoulli_bandit.py): a four-armed Bernoulli bandit simulation comparing epsilon-greedy, UCB1, and Thompson sampling strategies
+- [**Bernoulli Bandits**](docs/examples/bernoulli_bandit.py): a four-armed Bernoulli bandit simulation comparing epsilon-greedy, UCB1, and Thompson sampling strategies
 
 ## Contributing
 

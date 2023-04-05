@@ -16,7 +16,9 @@ nav:
 - Home:
   - Overview: index.md
   - License: license.md
-- Code Reference: reference/
+- User Guide:
+  - Usage Examples: examples/
+- API Reference: reference/
 - Development:
   - Contributing: contributing.md
   - Code of Conduct: code_of_conduct.md

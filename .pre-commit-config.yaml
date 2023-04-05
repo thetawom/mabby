@@ -29,7 +29,7 @@ repos:
     rev: 0.7.16
     hooks:
       - id: mdformat
-        exclude: docs/.*
+        exclude: docs/index.md|docs/license.md|docs/contributing.md|docs/code_of_conduct.md
         additional_dependencies:
           - mdformat-mkdocs
           - mdformat-black
