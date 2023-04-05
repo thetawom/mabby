@@ -23,6 +23,10 @@ class TestArm:
     def valid_params(self):
         pass
 
+    @pytest.fixture(params=[])
+    def invalid_params(self, request):
+        return request.param
+
     @pytest.fixture
     def arm(self, valid_params):
         return self.ARM_CLASS(**valid_params)
@@ -43,6 +47,10 @@ class TestArm:
     def sample(self, request, arm):
         rng = np.random.default_rng(seed=0)
         return [arm.play(rng) for _ in range(request.param)]
+
+    def test_init_with_invalid_params_raises_error(self, arm, invalid_params):
+        with pytest.raises(ValueError):
+            self.ARM_CLASS(**invalid_params)
 
     def test_bandit_returns_bandit_with_correct_types(self, bandit):
         assert isinstance(bandit, Bandit)
@@ -69,7 +77,7 @@ class TestBernoulliArm(TestArm):
     def valid_params(self, request):
         return request.param
 
-    @pytest.fixture(params=[{"p": [-0.1, 0.9]}])
+    @pytest.fixture(params=[{"p": -0.1}, {"p": 1.1}])
     def invalid_params(self, request):
         return request.param
 
@@ -86,10 +94,6 @@ class TestBernoulliArm(TestArm):
     def test_repr_includes_p(self, arm, valid_params):
         assert str(valid_params["p"]) in repr(arm)
 
-    def test_invalid_p_raises_error(self, arm, invalid_params):
-        with pytest.raises(ValueError):
-            self.ARM_CLASS.bandit(**invalid_params)
-
 
 class TestGaussianArm(TestArm):
     ARM_CLASS = GaussianArm
@@ -102,7 +106,7 @@ class TestGaussianArm(TestArm):
     def valid_params(self, request):
         return request.param
 
-    @pytest.fixture(params=[{"loc": [0.1, 0.3], "scale": [-1]}])
+    @pytest.fixture(params=[{"loc": 0.1, "scale": -1}])
     def invalid_params(self, request):
         return request.param
 
@@ -120,10 +124,6 @@ class TestGaussianArm(TestArm):
     def test_repr_includes_loc_and_scale(self, arm, valid_params):
         assert str(valid_params["loc"]) in repr(arm)
         assert str(valid_params["scale"]) in repr(arm)
-
-    def test_invalid_scale_raises_error(self, arm, invalid_params):
-        with pytest.raises(ValueError):
-            self.ARM_CLASS.bandit(**invalid_params)
 
 
 class TestBandit:
