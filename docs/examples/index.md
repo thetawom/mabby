@@ -1,0 +1,1 @@
+- [**Bernoulli Bandits**](bernoulli_bandits): a three-armed Bernoulli bandit simulation comparing epsilon-greedy, UCB1, and Thompson sampling strategies
