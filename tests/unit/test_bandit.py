@@ -69,6 +69,10 @@ class TestBernoulliArm(TestArm):
     def valid_params(self, request):
         return request.param
 
+    @pytest.fixture(params=[{"p": [-0.1, 0.9]}])
+    def invalid_params(self, request):
+        return request.param
+
     def test_init_sets_p(self, arm, valid_params):
         assert arm.p == valid_params["p"]
 
@@ -82,6 +86,10 @@ class TestBernoulliArm(TestArm):
     def test_repr_includes_p(self, arm, valid_params):
         assert str(valid_params["p"]) in repr(arm)
 
+    def test_invalid_p_raises_error(self, arm, invalid_params):
+        with pytest.raises(ValueError):
+            self.ARM_CLASS.bandit(**invalid_params)
+
 
 class TestGaussianArm(TestArm):
     ARM_CLASS = GaussianArm
@@ -92,6 +100,10 @@ class TestGaussianArm(TestArm):
 
     @pytest.fixture(params=[{"loc": 0.1, "scale": 2}])
     def valid_params(self, request):
+        return request.param
+
+    @pytest.fixture(params=[{"loc": [0.1, 0.3], "scale": [-1]}])
+    def invalid_params(self, request):
         return request.param
 
     def test_init_sets_loc_and_scale(self, arm, valid_params):
@@ -108,6 +120,10 @@ class TestGaussianArm(TestArm):
     def test_repr_includes_loc_and_scale(self, arm, valid_params):
         assert str(valid_params["loc"]) in repr(arm)
         assert str(valid_params["scale"]) in repr(arm)
+
+    def test_invalid_scale_raises_error(self, arm, invalid_params):
+        with pytest.raises(ValueError):
+            self.ARM_CLASS.bandit(**invalid_params)
 
 
 class TestBandit:

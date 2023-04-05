@@ -79,6 +79,11 @@ class BernoulliArm(Arm):
         Args:
             p: Parameter of the Bernoulli distribution.
         """
+        if p < 0 or p > 1:
+            raise ValueError(
+                f"float {str(p)} is not a valid probability for Bernoulli distribution"
+            )
+
         self.p: float = p  #: Parameter of the Bernoulli distribution
 
     @override
@@ -105,6 +110,11 @@ class GaussianArm(Arm):
             loc: Mean ("center") of the Gaussian distribution.
             scale: Standard deviation of the Gaussian distribution.
         """
+        if scale < 0:
+            raise ValueError(
+                f"float {str(scale)} is not a valid scale for Gaussian distribution"
+            )
+
         self.loc: float = loc  #: Mean ("center") of the Gaussian distribution
         self.scale: float = scale  #: Standard deviation of the Gaussian distribution
 
