@@ -9,7 +9,7 @@ from mabby.strategies import BetaTSStrategy, EpsilonGreedyStrategy, UCB1Strategy
 
 ### Configuring bandit arms
 
-First, to set up our simulation, let us start by configuring our multi-armed bandit. We want to simulate a $3$-armed bandit where the rewards of each arm follow Bernoulli distributions with `p` of 0.5, 0.6, and 0.7 respectively.
+First, to set up our simulation, let us start by configuring our multi-armed bandit. We want to simulate a 3-armed bandit where the rewards of each arm follow Bernoulli distributions with `p` of 0.5, 0.6, and 0.7 respectively.
 
 ```python
 ps = [0.5, 0.6, 0.7]
