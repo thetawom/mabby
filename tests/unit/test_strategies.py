@@ -8,6 +8,7 @@ from mabby import Agent
 from mabby.exceptions import StrategyUsageError
 from mabby.strategies import (
     BetaTSStrategy,
+    EpsilonFirstStrategy,
     EpsilonGreedyStrategy,
     RandomStrategy,
     SemiUniformStrategy,
@@ -178,6 +179,36 @@ class TestEpsilonGreedyStrategy(TestSemiUniformStrategy):
 
     def test_effective_eps_equals_eps(self, valid_params, strategy):
         assert strategy.effective_eps() == valid_params["eps"]
+
+
+class TestEpsilonFirstStrategy(TestSemiUniformStrategy):
+    STRATEGY_CLASS = EpsilonFirstStrategy
+
+    @pytest.fixture(params=[{"eps": 0.3}])
+    def valid_params(self, request):
+        return request.param
+
+    @pytest.fixture(params=[{"eps": -1}, {"eps": 1.2}])
+    def invalid_params(self, request):
+        return request.param
+
+    def test_init_sets_eps(self, valid_params, strategy):
+        assert strategy.eps == valid_params["eps"]
+
+    def test_repr_includes_eps(self, valid_params, strategy):
+        assert str(valid_params["eps"]) in repr(strategy)
+
+    def test_effective_eps_correct(
+        self, valid_params, prime_params, primed_strategy, choice, reward
+    ):
+        explore_steps = int(valid_params["eps"] * prime_params["steps"])
+        exploit_steps = prime_params["steps"] - explore_steps
+        for _ in range(explore_steps):
+            assert primed_strategy.effective_eps() >= 1
+            primed_strategy.update(choice, reward)
+        for _ in range(exploit_steps):
+            assert primed_strategy.effective_eps() == 0
+            primed_strategy.update(choice, reward)
 
 
 class TestUCB1Strategy(TestStrategy):

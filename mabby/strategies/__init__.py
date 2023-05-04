@@ -6,6 +6,7 @@ can also be sub-classed to implement custom bandit strategies.
 """
 
 from mabby.strategies.semi_uniform import (
+    EpsilonFirstStrategy,
     EpsilonGreedyStrategy,
     RandomStrategy,
     SemiUniformStrategy,
@@ -19,6 +20,7 @@ __all__ = [
     "SemiUniformStrategy",
     "RandomStrategy",
     "EpsilonGreedyStrategy",
+    "EpsilonFirstStrategy",
     "BetaTSStrategy",
     "UCB1Strategy",
 ]

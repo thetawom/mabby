@@ -118,3 +118,43 @@ class EpsilonGreedyStrategy(SemiUniformStrategy):
     @override
     def effective_eps(self) -> float:
         return self.eps
+
+
+class EpsilonFirstStrategy(SemiUniformStrategy):
+    """Epsilon-first bandit strategy.
+
+    The epsilon-first strategy has a pure exploration phase followed by a pure
+    exploitation phase.
+    """
+
+    _explore_steps_remaining: int
+
+    def __init__(self, eps: float) -> None:
+        """Initializes an epsilon-first strategy.
+
+        Args:
+            eps: The ratio of exploration steps (must be between 0 and 1).
+        """
+        super().__init__()
+        if eps < 0 or eps > 1:
+            raise ValueError("eps must be between 0 and 1")
+        self.eps = eps
+
+    @override
+    def __repr__(self) -> str:
+        return f"eps-first (eps={self.eps})"
+
+    @override
+    def prime(self, k: int, steps: int) -> None:
+        super().prime(k, steps)
+        self._explore_steps_remaining = int(self.eps * steps)
+
+    @override
+    def effective_eps(self) -> float:
+        return float(self._explore_steps_remaining > 0)
+
+    @override
+    def update(self, choice: int, reward: float, rng: Generator | None = None) -> None:
+        super().update(choice, reward, rng=rng)
+        if self._explore_steps_remaining > 0:
+            self._explore_steps_remaining -= 1
