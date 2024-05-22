@@ -14,7 +14,7 @@ overrides = "^7.3.1"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.0.4"
-black = {extras = ["jupyter"], version = "^23.3.0"}
+black = {extras = ["jupyter"], version = ">=23.3,<25.0"}
 mdformat = "^0.7.16"
 mdformat-black = "^0.1.1"
 mdformat-mkdocs = {extras = ["recommended"], version = "^1.0.0"}
