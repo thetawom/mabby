@@ -1,4 +1,5 @@
 """Provides metric tracking for multi-armed bandit simulations."""
+
 from __future__ import annotations
 
 from collections.abc import Iterable

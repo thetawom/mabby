@@ -1,4 +1,5 @@
 """Provides implementations of upper confidence bound (UCB) strategies."""
+
 from __future__ import annotations
 
 import numpy as np

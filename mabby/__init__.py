@@ -8,6 +8,7 @@ define and run bandit simulations, with the ability to:
 * configure environments with custom arm spaces and rewards distributions
 * collect and visualize simulation metrics like regret and optimality
 """
+
 from mabby.agent import Agent
 from mabby.arms import Arm, BernoulliArm, GaussianArm
 from mabby.bandit import Bandit
